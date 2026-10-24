@@ -28,5 +28,8 @@ Deploy to a Next.js-compatible host. No environment variables are required to ru
 - Supplied photograph: `public/images/jim-atkinson-band.jpg`
 - Blues Deluxe performance history and verified event URL: `src/lib/band.ts`
 - Original October 24, 2026 announcement artwork: `public/images/blues-deluxe-2026-10-24.jpg`
+- Official transparent logos: `public/brand/` (wordmark in the navigation, centered circular emblem in the footer)
+- Logo component and sizing: `src/components/band-logo.tsx` and `src/app/globals.css`
+- Favicon, Apple touch icon, and 1200×630 sharing images: generated from the official artwork by `src/lib/brand-images.tsx` and the App Router metadata image routes.
 
 Images and fonts are local. Includes reduced motion support, visible keyboard focus, a skip link, and an accessible mobile menu. Events link to the band's Facebook page.

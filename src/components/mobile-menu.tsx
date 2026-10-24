@@ -28,7 +28,7 @@ export function MobileMenu() {
   }, [open]);
 
   return (
-    <div ref={root} className="mobile-navigation relative md:hidden">
+    <div ref={root} className="mobile-navigation relative lg:hidden">
       <button ref={toggle} type="button" className="menu-toggle flex size-11 items-center justify-center" aria-expanded={open} aria-controls="mobile-menu" aria-label={open ? "Close navigation" : "Open navigation"} onClick={() => setOpen((previous) => !previous)}>
         <Icon name={open ? "close" : "menu"} size={24} />
       </button>

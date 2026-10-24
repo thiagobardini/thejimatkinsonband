@@ -1,14 +1,11 @@
 import Image from "next/image";
+import { BandLogo } from "@/components/band-logo";
 import { HeroPhoto } from "@/components/hero-photo";
 import { Icon } from "@/components/icon";
 import { MagneticLink } from "@/components/magnetic-link";
 import { MobileMenu } from "@/components/mobile-menu";
 import { band, bluesDeluxeSession, socialLinks } from "@/lib/band";
 import bluesDeluxeArtwork from "../../public/images/blues-deluxe-2026-10-24.jpg";
-
-function RecordMark({ small = false }: { small?: boolean }) {
-  return <span className={`record-mark${small ? " record-mark-small" : ""}`} aria-hidden="true"><span /></span>;
-}
 
 function Equalizer() {
   return <span className="equalizer" aria-hidden="true"><i /><i /><i /><i /><i /></span>;
@@ -19,16 +16,15 @@ export default function Home() {
     <>
       <a href="#main" className="skip-link">Skip to content</a>
       <header className="site-header relative mx-auto flex max-w-[1400px] items-center justify-between px-5 md:px-10 lg:px-16">
-        <a href="#" aria-label="The Jim Atkinson Band, home" className="brand flex items-center gap-3">
-          <RecordMark small />
-          <span>THE JIM ATKINSON<span className="block brand-bottom">BAND<span className="brand-period">.</span></span></span>
+        <a href="#" aria-label="The Jim Atkinson Band, home" className="brand">
+          <BandLogo variant="header" />
         </a>
-        <nav aria-label="Main navigation" className="hidden items-center gap-9 md:flex">
+        <nav aria-label="Main navigation" className="hidden items-center gap-9 lg:flex">
           <a className="nav-link" href="#the-band">The band</a>
           <a className="nav-link" href="#history">Our history</a>
           <a className="nav-link flex items-center gap-2" href={band.events} target="_blank" rel="noopener noreferrer">Live shows <Icon name="arrowUpRight" size={15} /></a>
         </nav>
-        <a href="#contact" className="header-contact hidden items-center gap-5 md:inline-flex">Get in touch <Icon name="arrowUpRight" size={19} /></a>
+        <a href="#contact" className="header-contact hidden items-center gap-5 lg:inline-flex">Get in touch <Icon name="arrowUpRight" size={19} /></a>
         <MobileMenu />
       </header>
 
@@ -132,11 +128,20 @@ export default function Home() {
         </section>
       </main>
 
-      <footer className="site-footer mx-auto flex max-w-[1400px] flex-col justify-between gap-7 px-5 md:flex-row md:items-center md:px-10 lg:px-16">
-        <div className="flex items-center gap-3"><RecordMark small /><p>© {new Date().getFullYear()} The Jim Atkinson Band.</p></div>
-        <nav aria-label="Social media" className="flex flex-wrap gap-6">
-          {socialLinks.map((social) => <a key={social.name} href={social.href} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5">{social.name}<Icon name="arrowUpRight" size={13} /></a>)}
-        </nav>
+      <footer className="site-footer mx-auto max-w-[1400px] px-5 md:px-10 lg:px-16">
+        <div className="footer-main flex flex-col items-center gap-5">
+          <a href="#" aria-label="The Jim Atkinson Band, back to top" className="footer-brand"><BandLogo variant="footer" /></a>
+          <div className="footer-socials">
+            <p className="eyebrow footer-label">KEEP UP WITH THE BAND</p>
+            <nav aria-label="Social media" className="flex flex-wrap justify-center gap-x-7 gap-y-1">
+              {socialLinks.map((social) => <a key={social.name} href={social.href} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">{social.name}<Icon name="arrowUpRight" size={14} /></a>)}
+            </nav>
+          </div>
+        </div>
+        <div className="footer-bottom flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+          <p>© {new Date().getFullYear()} The Jim Atkinson Band.</p>
+          <p>Central & Eastern Massachusetts · Since 2017</p>
+        </div>
       </footer>
     </>
   );
