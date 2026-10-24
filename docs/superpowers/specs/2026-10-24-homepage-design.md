@@ -9,3 +9,5 @@ Implementation: Next.js App Router as explicitly requested, TypeScript, Tailwind
 Acceptance: the page builds, photo loads, every destination matches the supplied links, mobile has no horizontal overflow, navigation and contact work with a keyboard, and reduced motion is respected.
 
 Revision: the user requested a Blues Deluxe tone, stronger button outlines and improved mobile presentation. Added the user-confirmed October 24, 2026 live performance on Blues Deluxe, WUML 91.5 FM in Lowell, from 3–6 PM Eastern. The public event announcement and its original artwork were read from https://www.facebook.com/events/2041463496559169/ and archived in the site's history as a past performance.
+
+Hero refinement: use email booking and upcoming shows as the two primary actions. Present Instagram, Facebook, and YouTube exactly once each in a separate labeled social navigation group with visible platform names. Preserve outlined controls, the Blues Deluxe palette, and the compact mobile layout.

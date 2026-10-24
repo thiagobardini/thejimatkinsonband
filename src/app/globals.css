@@ -55,17 +55,23 @@ button { cursor: pointer; }
 .hero-description { margin-top: 27px; animation-delay: 240ms; }
 .genre-line { font-size: 16px; letter-spacing: .005em; }
 .hero-subline { margin-top: 7px; font-size: 14px; color: var(--color-muted); }
-.hero-actions { margin-top: 29px; animation-delay: 320ms; }
+.hero-actions { max-width: 440px; margin-top: 29px; animation-delay: 320ms; }
+.hero-actions > span, .hero-actions > span > span, .hero-actions .button { width: 100%; }
 .button { display: inline-flex; align-items: center; justify-content: center; gap: 18px; min-height: 54px; padding: 0 23px; border: 1px solid transparent; border-radius: 8px; font-size: 13px; font-weight: 500; white-space: nowrap; transition: background .3s, color .3s, border-color .3s, transform .3s cubic-bezier(.16, 1, .3, 1); }
 .button-primary { background: var(--color-accent); color: var(--color-ink); border-color: #e5cda3; box-shadow: inset 0 1px 0 #eee9dd40; }
 .button-primary:hover { background: #d9bf91; }
 .button-secondary { color: var(--color-paper); border-color: #a0b0b866; background: #142630a6; }
 .button-secondary:hover { background: #233c4a; border-color: #c8ab79b3; }
-.button:active, .social-icon:active, .menu-toggle:active { transform: scale(.97); }
-.hero-socials { margin-top: 28px; gap: 10px; animation-delay: 400ms; }
-.follow-label { color: var(--color-muted); font-size: 9px; margin-right: 8px; }
-.social-icon { display: inline-flex; justify-content: center; align-items: center; width: 44px; min-height: 44px; border: 1px solid #a0b0b840; border-radius: 8px; color: #c5cfd1; background: #14263070; transition: color .3s, background .3s, border-color .3s, transform .3s cubic-bezier(.16, 1, .3, 1); }
-.social-icon:hover { color: var(--color-accent); border-color: #c8ab7980; background: #233c4a; transform: translateY(-2px); }
+.button:active, .social-channel:active, .menu-toggle:active { transform: scale(.98); }
+.hero-socials { max-width: 440px; margin-top: 26px; animation-delay: 400ms; }
+.follow-label { color: var(--color-muted); font-size: 9px; margin-bottom: 11px; }
+.social-channels { overflow: hidden; border: 1px solid #a0b0b840; border-radius: 9px; background: #14263050; }
+.social-channel { min-width: 0; min-height: 46px; padding: 8px; color: #b7c5cc; font-size: 12px; transition: color .25s, background .25s, transform .25s cubic-bezier(.16, 1, .3, 1); }
+.social-channel + .social-channel { border-left: 1px solid #a0b0b82e; }
+.social-channel:hover { color: var(--color-paper); background: #263e4c; }
+.social-channel:focus-visible { outline-offset: -4px; }
+.social-channel svg { flex-shrink: 0; color: #a0b0b8; }
+.social-channel:hover svg { color: var(--color-accent); }
 .hero-visual { position: absolute; z-index: -1; top: 37px; right: 0; bottom: 77px; width: 68%; overflow: hidden; }
 .hero-photo { position: relative; height: 100%; width: 100%; background: #172e3b; }
 .hero-photo img { object-position: 52% 50%; filter: grayscale(1) brightness(.85) contrast(1.05); mix-blend-mode: luminosity; }
@@ -156,7 +162,6 @@ button { cursor: pointer; }
   .hero-visual::after { background: linear-gradient(90deg, #101e28 0%, #101e28d9 13%, #101e284d 55%, #101e2800 80%), linear-gradient(0deg, #101e28 0%, #101e2800 35%); }
   .photo-note { right: 40px; top: 48px; }
   .est-seal { right: 35px; bottom: 133px; width: 98px; height: 98px; }
-  .hero-actions { gap: 20px; }
   .about-section { gap: 40px; }
   .contact-section .grid { gap: 30px; }
 }
@@ -173,10 +178,10 @@ button { cursor: pointer; }
   .genre-line { font-size: 14px; }
   .hero-subline { font-size: 13px; }
   .hero-actions { display: grid; grid-template-columns: 1fr 1fr; max-width: 440px; margin-top: 24px; gap: 12px; }
-  .hero-actions > span, .hero-actions > span > span, .hero-actions .button { width: 100%; }
   .button { min-height: 50px; font-size: 12px; padding-inline: 14px; gap: 12px; }
-  .hero-socials { gap: 10px; margin-top: 23px; }
-  .follow-label { font-size: 8px; margin-right: 8px; }
+  .hero-socials { margin-top: 24px; }
+  .follow-label { font-size: 8px; margin-bottom: 10px; }
+  .social-channel { gap: 6px; font-size: 11px; padding-inline: 6px; }
   .hero-visual { position: absolute; top: 0; right: 0; bottom: auto; width: 100%; height: 355px; margin-top: 0; z-index: -1; }
   .hero-photo img { object-position: 65% 46%; filter: grayscale(1) brightness(.8) contrast(1.05); }
   .hero-visual::after { background: linear-gradient(90deg, #101e28f2 0%, #101e28cc 18%, #101e2840 63%, #101e280d 100%), linear-gradient(0deg, #101e28 0%, #101e2800 60%); }

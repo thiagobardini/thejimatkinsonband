@@ -46,15 +46,19 @@ export default function Home() {
               <p className="genre-line">Blues. Rock. New Orleans rhythms.</p>
               <p className="hero-subline">Good music. Good company. Since 2017.</p>
             </div>
-            <div className="hero-actions intro-reveal flex flex-wrap items-center gap-x-7 gap-y-4">
+            <div className="hero-actions intro-reveal grid grid-cols-2 gap-3">
               <MagneticLink href={band.emailHref} className="button button-primary">Book the band <Icon name="arrowUpRight" size={19} /></MagneticLink>
-              <a href={band.instagram} target="_blank" rel="noopener noreferrer" aria-label="Message The Jim Atkinson Band on Instagram (opens in a new tab)" className="button button-secondary"><Icon name="instagram" size={20} /> Instagram</a>
+              <a href={band.events} target="_blank" rel="noopener noreferrer" className="button button-secondary">Upcoming shows <Icon name="arrowUpRight" size={19} /></a>
             </div>
-            <div className="hero-socials intro-reveal flex items-center gap-5">
-              <span className="eyebrow follow-label">FOLLOW THE SOUND</span>
-              {socialLinks.map((social) => (
-                <a key={social.name} className="social-icon" href={social.href} target="_blank" rel="noopener noreferrer" aria-label={`The Jim Atkinson Band on ${social.name} (opens in a new tab)`}><Icon name={social.icon} size={20} /></a>
-              ))}
+            <div className="hero-socials intro-reveal">
+              <p id="hero-socials-label" className="eyebrow follow-label">FOLLOW THE BAND</p>
+              <nav aria-labelledby="hero-socials-label" className="social-channels grid grid-cols-3">
+                {socialLinks.map((social) => (
+                  <a key={social.name} className="social-channel flex items-center justify-center gap-2" href={social.href} target="_blank" rel="noopener noreferrer" aria-label={`${social.name} — The Jim Atkinson Band (opens in a new tab)`}>
+                    <Icon name={social.icon} size={17} /><span>{social.name}</span>
+                  </a>
+                ))}
+              </nav>
             </div>
           </div>
           <div className="photo-note"><span className="photo-note-rule" /><span className="eyebrow">REAL PEOPLE.<br />REAL LIVE MUSIC.</span></div>
