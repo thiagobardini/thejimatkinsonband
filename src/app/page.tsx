@@ -6,6 +6,7 @@ import { MagneticLink } from "@/components/magnetic-link";
 import { MobileMenu } from "@/components/mobile-menu";
 import { band, bluesDeluxeSession, socialLinks } from "@/lib/band";
 import bluesDeluxeArtwork from "../../public/images/blues-deluxe-2026-10-24.jpg";
+import heroLogo from "../../public/brand/band-hero-logo.png";
 
 function Equalizer() {
   return <span className="equalizer" aria-hidden="true"><i /><i /><i /><i /><i /></span>;
@@ -33,10 +34,9 @@ export default function Home() {
           <div className="hero-visual"><HeroPhoto /></div>
           <div className="hero-copy relative px-5 md:px-10 lg:px-16">
             <p className="eyebrow hero-eyebrow intro-reveal flex items-center gap-3"><span className="short-rule" /> A LITTLE GRIT. A WHOLE LOT OF SOUL.</p>
-            <h1 id="hero-title" className="hero-title intro-reveal font-display uppercase">
-              <span className="block">The Jim</span>
-              <span className="block">Atkinson</span>
-              <span className="block"><span className="band-title">Band</span><span className="title-period">.</span></span>
+            <h1 id="hero-title" className="hero-title intro-reveal">
+              <span className="sr-only">The Jim Atkinson Band.</span>
+              <Image src={heroLogo} alt="" aria-hidden="true" className="hero-title-image" sizes="(max-width: 767px) 288px, (max-width: 1023px) 400px, 440px" preload />
             </h1>
             <div className="hero-description intro-reveal">
               <p className="genre-line">Blues. Rock. New Orleans rhythms.</p>
