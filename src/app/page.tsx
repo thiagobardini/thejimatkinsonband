@@ -33,25 +33,27 @@ export default function Home() {
         <section aria-labelledby="hero-title" className="hero relative mx-auto max-w-[1400px]">
           <div className="hero-visual"><HeroPhoto /></div>
           <div className="hero-copy relative px-5 md:px-10 lg:px-16">
-            <p className="eyebrow hero-eyebrow intro-reveal flex items-center gap-3"><span className="short-rule" /> A LITTLE GRIT. A WHOLE LOT OF SOUL.</p>
+            <p className="eyebrow hero-eyebrow intro-reveal hidden items-center gap-3 md:flex"><span className="short-rule" />A LITTLE GRIT. A WHOLE LOT OF SOUL.</p>
             <h1 id="hero-title" className="hero-title intro-reveal">
-              <span className="sr-only">The Jim Atkinson Band.</span>
-              <Image src={heroLogo} alt="" aria-hidden="true" className="hero-title-image" sizes="(max-width: 767px) 288px, (max-width: 1023px) 400px, 440px" preload />
+              <span className="hidden md:block">
+                <span className="sr-only">The Jim Atkinson Band.</span>
+                <Image src={heroLogo} alt="" aria-hidden="true" className="hero-title-image" sizes="(max-width: 1023px) 400px, 440px" />
+              </span>
+              <span className="hero-title-mobile block md:hidden"><span className="hero-music-genres block font-display uppercase">Blues. Rock.</span><span className="hero-music-rhythms block">New Orleans rhythms.</span></span>
             </h1>
             <div className="hero-description intro-reveal">
-              <p className="genre-line">Blues. Rock. New Orleans rhythms.</p>
-              <p className="hero-subline">Good music. Good company. Since 2017.</p>
+              <p className="genre-line hidden md:block">Blues. Rock. New Orleans rhythms.</p>
+              <p className="hero-subline">Good music. Good company.<span className="hidden md:inline"> Since 2017.</span></p>
             </div>
-            <div className="hero-actions intro-reveal grid grid-cols-2 gap-3">
+            <div className="hero-actions intro-reveal flex flex-wrap items-center gap-x-6 gap-y-3">
               <MagneticLink href={band.emailHref} className="button button-primary">Book the band <Icon name="arrowUpRight" size={19} /></MagneticLink>
-              <a href={band.events} target="_blank" rel="noopener noreferrer" className="button button-secondary">Upcoming shows <Icon name="arrowUpRight" size={19} /></a>
+              <a href={band.events} target="_blank" rel="noopener noreferrer" className="hero-shows inline-flex items-center gap-2">Upcoming shows <Icon name="arrowUpRight" size={16} /></a>
             </div>
             <div className="hero-socials intro-reveal">
-              <p id="hero-socials-label" className="eyebrow follow-label">FOLLOW THE BAND</p>
-              <nav aria-labelledby="hero-socials-label" className="social-channels grid grid-cols-3">
+              <nav aria-label="Follow the band" className="social-channels flex flex-wrap items-center gap-x-5">
                 {socialLinks.map((social) => (
-                  <a key={social.name} className="social-channel flex items-center justify-center gap-2" href={social.href} target="_blank" rel="noopener noreferrer" aria-label={`${social.name} — The Jim Atkinson Band (opens in a new tab)`}>
-                    <Icon name={social.icon} size={17} /><span>{social.name}</span>
+                  <a key={social.name} className="social-channel inline-flex items-center gap-2" href={social.href} target="_blank" rel="noopener noreferrer" aria-label={`${social.name} — The Jim Atkinson Band (opens in a new tab)`}>
+                    <Icon name={social.icon} size={16} /><span>{social.name}</span>
                   </a>
                 ))}
               </nav>
