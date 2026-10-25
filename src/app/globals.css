@@ -137,7 +137,10 @@ button { cursor: pointer; }
 @media (max-width: 767px) {
   :root { --header-height: 88px; }
   .brand-logo-header { width: 208px; }
-  .hero-copy { width: 100%; align-items: flex-start; justify-content: center; padding-top: clamp(220px, 65vw, 280px); padding-bottom: clamp(56px, 9dvh, 88px); text-align: left; }
+  /* Browser chrome can change dvh while scrolling; keep photo and copy anchored together. */
+  .hero { min-height: calc(100svh - var(--header-height)); }
+  .hero-copy { width: 100%; align-items: flex-start; justify-content: flex-start; padding-top: clamp(220px, 65vw, 280px); padding-bottom: clamp(56px, 9svh, 88px); text-align: left; }
+  .hero .intro-reveal { animation-fill-mode: backwards; }
   .hero-eyebrow { font-size: 8px; letter-spacing: .16em; }
   .hero-eyebrow .short-rule { display: none; }
   .hero-title { width: 100%; margin-top: 18px; }
