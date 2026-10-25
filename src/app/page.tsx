@@ -7,10 +7,6 @@ import { MobileMenu } from "@/components/mobile-menu";
 import { band, bluesDeluxeSession, socialLinks } from "@/lib/band";
 import bluesDeluxeArtwork from "../../public/images/blues-deluxe-2026-10-24.jpg";
 
-function Equalizer() {
-  return <span className="equalizer" aria-hidden="true"><i /><i /><i /><i /><i /></span>;
-}
-
 export default function Home() {
   return (
     <>
@@ -47,10 +43,11 @@ export default function Home() {
             <div className="hero-community">
               <div className="est-seal" aria-label="Making music in Massachusetts since 2017"><span>EST.</span><strong>2017</strong><span><span className="hidden md:inline">MASSACHUSETTS</span><span className="md:hidden">MA</span></span></div>
               <div className="hero-socials intro-reveal">
-                <nav aria-label="Follow the band" className="social-channels flex flex-wrap items-center gap-x-5">
-                  {socialLinks.map((social) => (
+                <nav aria-label="Watch and follow the band" className="social-channels flex flex-wrap items-center gap-x-5">
+                  <a href={band.youtube} target="_blank" rel="noopener noreferrer" aria-label="Watch us play — The Jim Atkinson Band on YouTube (opens in a new tab)" className="social-channel inline-flex items-center gap-2"><Icon name="youtube" size={18} /><span>Watch us play</span></a>
+                  {socialLinks.filter((social) => social.icon !== "youtube").map((social) => (
                     <a key={social.name} className="social-channel inline-flex items-center gap-2" href={social.href} target="_blank" rel="noopener noreferrer" aria-label={`${social.name} — The Jim Atkinson Band (opens in a new tab)`}>
-                      <Icon name={social.icon} size={16} /><span>{social.name}</span>
+                      <Icon name={social.icon} size={18} /><span>{social.name}</span>
                     </a>
                   ))}
                 </nav>
@@ -61,13 +58,6 @@ export default function Home() {
           <div className="hero-bottom flex flex-wrap items-center justify-between gap-4 px-5 md:px-10 lg:px-16">
             <p className="flex items-center gap-2.5"><Icon name="location" size={16} /> Central & Eastern Massachusetts</p>
             <a href="#the-band" className="discover-link flex items-center gap-3">GET TO KNOW THE BAND <Icon name="arrowDown" size={16} /></a>
-          </div>
-        </section>
-
-        <section className="sound-strip" aria-label="Our sound">
-          <div className="mx-auto flex max-w-[1400px] flex-wrap items-center justify-between gap-x-5 gap-y-3 px-5 md:px-10 lg:px-16">
-            <p className="flex items-center gap-3"><Equalizer /><span>GOOD MUSIC. GOOD COMPANY.</span></p>
-            <a href={band.youtube} target="_blank" rel="noopener noreferrer" className="strip-listen flex items-center gap-3"><span>WATCH US PLAY</span><span className="play-circle"><Icon name="play" size={12} /></span></a>
           </div>
         </section>
 
