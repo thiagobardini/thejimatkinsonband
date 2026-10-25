@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { SpeakerHigh, SpeakerSlash } from "@phosphor-icons/react";
 import { motion, useInView, useReducedMotion, useScroll, useTransform } from "framer-motion";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Icon } from "@/components/icon";
@@ -27,6 +28,7 @@ export function LivePerformance() {
   const nearby = useInView(section, { margin: "300px 0px", once: true });
   const inView = useInView(frame, { amount: 0.6 });
   const [ready, setReady] = useState(false);
+  const [muted, setMuted] = useState(true);
   const [playback, setPlayback] = useState<Playback>("loading");
   const [errorCode, setErrorCode] = useState<number | null>(null);
   const [pageVisible, setPageVisible] = useState(true);
@@ -50,7 +52,36 @@ export function LivePerformance() {
     automaticPause.current = true;
     player.current.pauseVideo();
     player.current.mute();
+    setMuted(true);
   }, []);
+
+  const toggleSound = () => {
+    const current = player.current;
+    if (!playerReady.current || !current || !visible.current) return;
+    if (!current.isMuted() && current.getVolume() > 0) {
+      current.mute();
+      setMuted(true);
+      return;
+    }
+    if (current.getVolume() === 0) current.setVolume(80);
+    manualPause.current = false;
+    autoplayBlocked.current = false;
+    current.unMute();
+    current.playVideo();
+    setMuted(false);
+  };
+
+  useEffect(() => {
+    if (!ready || !inView || !pageVisible) return;
+    // Native keyboard shortcuts can also change the player's volume.
+    const syncSound = () => {
+      if (!playerReady.current || !player.current) return;
+      setMuted(player.current.isMuted() || player.current.getVolume() === 0);
+    };
+    syncSound();
+    const timer = window.setInterval(syncSound, 500);
+    return () => window.clearInterval(timer);
+  }, [ready, inView, pageVisible]);
 
   useEffect(() => {
     const syncVisibility = () => setPageVisible(!document.hidden);
@@ -91,6 +122,7 @@ export function LivePerformance() {
       player.current?.destroy();
       player.current = null;
       setReady(false);
+      setMuted(true);
       setErrorCode(typeof error === "number" ? error : null);
       setPlayback("error");
     };
@@ -102,7 +134,7 @@ export function LivePerformance() {
         videoId,
         width: "100%",
         height: "100%",
-        playerVars: { autoplay: 0, playsinline: 1, controls: 1, rel: 0, origin: window.location.origin },
+        playerVars: { autoplay: 0, playsinline: 1, controls: 0, rel: 0, origin: window.location.origin },
         events: {
           onReady: (event) => {
             if (disposed || failed) return;
@@ -110,6 +142,7 @@ export function LivePerformance() {
             player.current = event.target;
             playerReady.current = true;
             event.target.mute();
+            setMuted(true);
             const iframe = event.target.getIframe();
             iframe.title = videoTitle;
             iframe.referrerPolicy = "strict-origin-when-cross-origin";
@@ -133,12 +166,16 @@ export function LivePerformance() {
               setPlayback("paused");
             } else if (event.data === 0) {
               manualPause.current = true;
+              event.target.mute();
+              setMuted(true);
               setPlayback("paused");
             }
           },
           onAutoplayBlocked: () => {
             if (disposed || failed) return;
             autoplayBlocked.current = true;
+            player.current?.mute();
+            setMuted(true);
             setPlayback("blocked");
           },
           onError: (event) => fail(event.data),
@@ -178,10 +215,25 @@ export function LivePerformance() {
       </div>
       <div ref={track} className={styles.track}>
       <div className={styles.stage}>
-        <motion.div ref={frame} className={styles.screen} style={reduced ? { scale: 1, rotateX: 0, y: 0 } : compact ? { scale: mobileScale, rotateX: 0, y: rise } : { scale, rotateX, y: rise }} data-playback={playback}>
+        <motion.div ref={frame} className={styles.screen} style={reduced ? { scale: 1, rotateX: 0, y: 0 } : compact ? { scale: mobileScale, rotateX: 0, y: 0 } : { scale, rotateX, y: rise }} data-playback={playback}>
           <Image src={`https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`} alt="The Jim Atkinson Band performing live on a brick-walled stage under warm lights" fill unoptimized sizes="100vw" className={styles.poster} />
           <div ref={mount} className={styles.player} hidden={playback === "error"} />
         </motion.div>
+        {playback !== "error" && (
+          <div className={styles.soundBar}>
+            <button
+              type="button"
+              className={styles.soundToggle}
+              onClick={toggleSound}
+              disabled={!ready || !inView || !pageVisible}
+              aria-pressed={!muted}
+              title={muted ? "Turn sound on" : "Turn sound off"}
+            >
+              {muted ? <SpeakerSlash size={17} weight="light" aria-hidden="true" /> : <SpeakerHigh size={17} weight="light" aria-hidden="true" />}
+              <span>{muted ? "Sound on" : "Sound off"}</span>
+            </button>
+          </div>
+        )}
       </div>
       </div>
       <div className={styles.outro} aria-hidden="true" />
