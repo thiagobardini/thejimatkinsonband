@@ -6,7 +6,7 @@ import { MagneticLink } from "@/components/magnetic-link";
 import { MobileMenu } from "@/components/mobile-menu";
 import { band, bluesDeluxeSession, socialLinks } from "@/lib/band";
 import bluesDeluxeArtwork from "../../public/images/blues-deluxe-2026-10-24.jpg";
-import legacyLogo from "../../public/brand/band-legacy-logo.jpg";
+import legacyLogo from "../../public/brand/band-legacy-logo.png";
 
 export default function Home() {
   return (
