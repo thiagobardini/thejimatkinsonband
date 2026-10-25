@@ -5,7 +5,7 @@ export const band = {
   instagram: "https://www.instagram.com/thejimatkinsonband/",
   instagramMessage: "https://ig.me/m/thejimatkinsonband",
   facebook: "https://www.facebook.com/profile.php?id=100063041748866",
-  events: "https://www.facebook.com/profile.php?id=100063041748866&sk=upcoming_hosted_events",
+  events: "https://www.facebook.com/people/The-Jim-Atkinson-Band/100063041748866/?sk=events",
   youtube: "https://www.youtube.com/@TheJimAtkinsonBand",
 } as const;
 
