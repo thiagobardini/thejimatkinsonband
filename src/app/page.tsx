@@ -6,7 +6,6 @@ import { MagneticLink } from "@/components/magnetic-link";
 import { MobileMenu } from "@/components/mobile-menu";
 import { band, bluesDeluxeSession, socialLinks } from "@/lib/band";
 import bluesDeluxeArtwork from "../../public/images/blues-deluxe-2026-10-24.jpg";
-import heroLogo from "../../public/brand/band-hero-logo.png";
 
 function Equalizer() {
   return <span className="equalizer" aria-hidden="true"><i /><i /><i /><i /><i /></span>;
@@ -32,35 +31,33 @@ export default function Home() {
       <main id="main">
         <section aria-labelledby="hero-title" className="hero relative mx-auto max-w-[1400px]">
           <div className="hero-visual"><HeroPhoto /></div>
-          <div className="hero-copy relative px-5 md:px-10 lg:px-16">
+          <div className="hero-copy px-5 md:px-10 lg:px-16">
             <p className="eyebrow hero-eyebrow intro-reveal hidden items-center gap-3 md:flex"><span className="short-rule" />A LITTLE GRIT. A WHOLE LOT OF SOUL.</p>
             <h1 id="hero-title" className="hero-title intro-reveal">
-              <span className="hidden md:block">
-                <span className="sr-only">The Jim Atkinson Band.</span>
-                <Image src={heroLogo} alt="" aria-hidden="true" className="hero-title-image" sizes="(max-width: 1023px) 400px, 440px" />
-              </span>
-              <span className="hero-title-mobile block md:hidden"><span className="hero-music-genres block font-display uppercase">Blues. Rock.</span><span className="hero-music-rhythms block">New Orleans rhythms.</span></span>
+              <span className="hero-music-genres block font-display uppercase">Blues. Rock.</span>
+              <span className="hero-music-rhythms block">New Orleans rhythms.</span>
             </h1>
             <div className="hero-description intro-reveal">
-              <p className="genre-line hidden md:block">Blues. Rock. New Orleans rhythms.</p>
               <p className="hero-subline">Good music. Good company.<span className="hidden md:inline"> Since 2017.</span></p>
             </div>
             <div className="hero-actions intro-reveal flex flex-wrap items-center gap-x-6 gap-y-3">
-              <MagneticLink href={band.emailHref} className="button button-primary">Book the band <Icon name="arrowUpRight" size={19} /></MagneticLink>
+              <MagneticLink href={band.emailHref} className="hero-booking inline-flex items-center gap-3"><span>Book the band</span><Icon name="arrowUpRight" size={18} /></MagneticLink>
               <a href={band.events} target="_blank" rel="noopener noreferrer" className="hero-shows inline-flex items-center gap-2">Upcoming shows <Icon name="arrowUpRight" size={16} /></a>
             </div>
-            <div className="hero-socials intro-reveal">
-              <nav aria-label="Follow the band" className="social-channels flex flex-wrap items-center gap-x-5">
-                {socialLinks.map((social) => (
-                  <a key={social.name} className="social-channel inline-flex items-center gap-2" href={social.href} target="_blank" rel="noopener noreferrer" aria-label={`${social.name} — The Jim Atkinson Band (opens in a new tab)`}>
-                    <Icon name={social.icon} size={16} /><span>{social.name}</span>
-                  </a>
-                ))}
-              </nav>
+            <div className="hero-community">
+              <div className="est-seal" aria-label="Making music in Massachusetts since 2017"><span>EST.</span><strong>2017</strong><span>MASSACHUSETTS</span></div>
+              <div className="hero-socials intro-reveal">
+                <nav aria-label="Follow the band" className="social-channels flex flex-wrap items-center gap-x-5">
+                  {socialLinks.map((social) => (
+                    <a key={social.name} className="social-channel inline-flex items-center gap-2" href={social.href} target="_blank" rel="noopener noreferrer" aria-label={`${social.name} — The Jim Atkinson Band (opens in a new tab)`}>
+                      <Icon name={social.icon} size={16} /><span>{social.name}</span>
+                    </a>
+                  ))}
+                </nav>
+              </div>
             </div>
           </div>
           <div className="photo-note"><span className="photo-note-rule" /><span className="eyebrow">REAL PEOPLE.<br />REAL LIVE MUSIC.</span></div>
-          <div className="est-seal" aria-label="Making music since 2017"><span>EST.</span><strong>2017</strong><span>MASSACHUSETTS</span></div>
           <div className="hero-bottom flex flex-wrap items-center justify-between gap-4 px-5 md:px-10 lg:px-16">
             <p className="flex items-center gap-2.5"><Icon name="location" size={16} /> Central & Eastern Massachusetts</p>
             <a href="#the-band" className="discover-link flex items-center gap-3">GET TO KNOW THE BAND <Icon name="arrowDown" size={16} /></a>
