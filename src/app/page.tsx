@@ -32,7 +32,7 @@ export default function Home() {
         <section aria-labelledby="hero-title" className="hero relative mx-auto max-w-[1400px]">
           <div className="hero-visual"><HeroPhoto /></div>
           <div className="hero-copy px-5 md:px-10 lg:px-16">
-            <p className="eyebrow hero-eyebrow intro-reveal hidden items-center gap-3 md:flex"><span className="short-rule" />A LITTLE GRIT. A WHOLE LOT OF SOUL.</p>
+            <p className="eyebrow hero-eyebrow intro-reveal flex items-center gap-3"><span className="short-rule" /><span className="hidden md:inline">A LITTLE GRIT. A WHOLE LOT OF SOUL.</span><span className="md:hidden">MASSACHUSETTS · EST. 2017</span></p>
             <h1 id="hero-title" className="hero-title intro-reveal">
               <span className="hero-music-genres block font-display uppercase">Blues. Rock.</span>
               <span className="hero-music-rhythms block">New Orleans rhythms.</span>
@@ -45,7 +45,7 @@ export default function Home() {
               <a href={band.events} target="_blank" rel="noopener noreferrer" className="hero-shows inline-flex items-center gap-2">Upcoming shows <Icon name="arrowUpRight" size={16} /></a>
             </div>
             <div className="hero-community">
-              <div className="est-seal" aria-label="Making music in Massachusetts since 2017"><span>EST.</span><strong>2017</strong><span>MASSACHUSETTS</span></div>
+              <div className="est-seal" aria-label="Making music in Massachusetts since 2017"><span>EST.</span><strong>2017</strong><span><span className="hidden md:inline">MASSACHUSETTS</span><span className="md:hidden">MA</span></span></div>
               <div className="hero-socials intro-reveal">
                 <nav aria-label="Follow the band" className="social-channels flex flex-wrap items-center gap-x-5">
                   {socialLinks.map((social) => (

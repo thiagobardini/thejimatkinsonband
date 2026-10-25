@@ -75,9 +75,9 @@ button { cursor: pointer; }
 .photo-note-rule { height: 28px; width: 1px; background: var(--color-accent); }
 .est-seal { position: absolute; bottom: 127px; right: 67px; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 108px; height: 108px; border: 1px solid #c8ab7980; border-radius: 50%; background: #101e2899; color: var(--color-accent); }
 .est-seal::before { content: ""; position: absolute; inset: 5px; border: 1px solid #eee9dd40; border-radius: 50%; }
-.est-seal span:first-child { font-size: 9px; letter-spacing: .2em; }
+.est-seal > span:first-child { font-size: 9px; letter-spacing: .2em; }
 .est-seal strong { font-family: var(--font-display); font-size: 31px; font-weight: 500; line-height: 1.3; }
-.est-seal span:last-child { font-size: 6px; letter-spacing: .13em; }
+.est-seal > span:last-child { font-size: 6px; letter-spacing: .13em; }
 .hero-bottom { min-height: 77px; border-top: 1px solid #eee9dd19; }
 .hero-bottom p { color: var(--color-muted); font-size: 12px; }
 .discover-link { min-height: 44px; font-size: 9px; letter-spacing: .12em; color: #c2ccd0; transition: color .25s; }
@@ -159,8 +159,10 @@ button { cursor: pointer; }
 @media (max-width: 767px) {
   :root { --header-height: 88px; }
   .brand-logo-header { width: 208px; }
-  .hero-copy { width: 100%; align-items: flex-start; justify-content: flex-start; padding-top: clamp(220px, 65vw, 280px); padding-bottom: 32px; text-align: left; }
-  .hero-title { width: 100%; margin-top: auto; }
+  .hero-copy { width: 100%; align-items: flex-start; justify-content: center; padding-top: clamp(220px, 65vw, 280px); padding-bottom: clamp(56px, 9dvh, 88px); text-align: left; }
+  .hero-eyebrow { font-size: 8px; letter-spacing: .16em; }
+  .hero-eyebrow .short-rule { display: none; }
+  .hero-title { width: 100%; margin-top: 18px; }
   .hero-music-genres { font-size: clamp(36px, 11.6vw, 46px); font-weight: 500; letter-spacing: .035em; line-height: 1.05; }
   .hero-music-rhythms { margin-top: 10px; color: var(--color-accent); font-size: clamp(18px, 5.3vw, 21px); font-style: italic; font-weight: 400; letter-spacing: .015em; line-height: 1.4; }
   .hero-description { margin-top: 16px; }
@@ -168,9 +170,8 @@ button { cursor: pointer; }
   .hero-actions { max-width: 440px; margin-top: 24px; column-gap: 24px; }
   .hero-booking { font-size: 15px; }
   .button { min-height: 50px; font-size: 12px; padding-inline: 14px; gap: 12px; }
-  .hero-community { display: flex; align-items: center; justify-content: space-between; width: 100%; margin-top: auto; padding-top: 32px; }
-  .hero-socials { max-width: none; margin: 0; }
-  .social-channels { justify-content: flex-end; column-gap: 4px; }
+  .hero-socials { max-width: none; margin-top: 20px; }
+  .social-channels { justify-content: flex-start; column-gap: 4px; }
   .social-channel { justify-content: center; width: 44px; }
   .social-channel > span { display: none; }
   .social-channel svg { width: 20px; height: 20px; }
@@ -178,10 +179,7 @@ button { cursor: pointer; }
   .hero-photo img { object-position: 30% 46%; filter: grayscale(1) brightness(1) contrast(1.05); }
   .hero-visual::after { background: linear-gradient(180deg, #101e280d 0%, #101e281a 42%, #101e28b3 72%, #101e28 100%); }
   .photo-note { display: none; }
-  .est-seal { position: relative; right: auto; bottom: auto; display: flex; flex-shrink: 0; width: 88px; height: 88px; background: transparent; }
-  .est-seal span:first-child { font-size: 8px; }
-  .est-seal strong { font-size: 29px; }
-  .est-seal span:last-child { font-size: 6px; }
+  .est-seal { display: none; }
   .hero-bottom { min-height: 66px; padding-block: 10px; gap: 4px 12px; }
   .hero-bottom p { font-size: 11px; }
   .discover-link, .sound-strip { display: none; }
