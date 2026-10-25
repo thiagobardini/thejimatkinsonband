@@ -11,6 +11,7 @@ import legacyLogo from "../../public/brand/band-legacy-logo.png";
 import { ContactLinks } from "@/components/contact-links";
 import { LivePerformance } from "@/components/live-performance";
 import { SectionReveal } from "@/components/section-reveal";
+import { StudioCredit } from "@/components/studio-credit";
 
 export default function Home() {
   return (
@@ -137,6 +138,7 @@ export default function Home() {
           <p>© {new Date().getFullYear()} The Jim Atkinson Band.</p>
           <p>Central & Eastern Massachusetts · Since 2017</p>
         </div>
+        <StudioCredit />
       </footer>
     </>
   );

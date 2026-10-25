@@ -173,7 +173,8 @@ button { cursor: pointer; }
   .footer-main { gap: 20px; }
   .footer-brand { width: 144px; }
   .footer-socials nav { gap: 24px; font-size: 12px; }
-  .footer-bottom { margin-top: 22px; padding-top: 18px; font-size: 9px; }
+  .footer-bottom { align-items: center; gap: 4px; margin-top: 22px; padding-top: 20px; font-size: 10px; line-height: 1.6; text-align: center; }
+  .footer-bottom > p + p { font-size: 9px; }
   .history-section { padding-top: 48px; padding-bottom: 55px; }
   .history-heading { margin-bottom: 27px; }
   .history-heading .section-title { font-size: 32px; max-width: 310px; text-wrap: balance; }
