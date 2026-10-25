@@ -1,5 +1,5 @@
 import Image from "next/image";
-import wordmark from "../../public/brand/band-logo-teal.png";
+import wordmark from "../../public/brand/band-navbar-logo.png";
 import emblem from "../../public/brand/band-emblem.png";
 
 export function BandLogo({ variant }: { variant: "header" | "footer" }) {

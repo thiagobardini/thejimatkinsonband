@@ -33,7 +33,7 @@ export default function Home() {
             <p className="eyebrow hero-eyebrow intro-reveal flex items-center gap-3"><span className="short-rule" /><span className="hidden md:inline">A LITTLE GRIT. A WHOLE LOT OF SOUL.</span><span className="md:hidden">MASSACHUSETTS · EST. 2017</span></p>
             <h1 id="hero-title" className="hero-title intro-reveal">
               <span className="hero-music-genres block font-display uppercase">Blues. Rock.</span>
-              <span className="hero-music-rhythms block">New Orleans rhythms.</span>
+              <span className="hero-music-rhythms block">Roots Music.</span>
             </h1>
             <div className="hero-description intro-reveal">
               <p className="hero-subline">Good music. Good company.</p>
