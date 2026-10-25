@@ -7,6 +7,7 @@ import { MobileMenu } from "@/components/mobile-menu";
 import { band, bluesDeluxeSession, socialLinks } from "@/lib/band";
 import bluesDeluxeArtwork from "../../public/images/blues-deluxe-2026-10-24.jpg";
 import legacyLogo from "../../public/brand/band-legacy-logo.png";
+import { ContactLinks } from "@/components/contact-links";
 
 export default function Home() {
   return (
@@ -105,16 +106,7 @@ export default function Home() {
               <h2 id="contact-title" className="section-title font-display uppercase">Your stage.<br />Our kind of night.</h2>
               <p className="contact-description">Have a venue, an event, or just a question?<br />We’d love to hear from you.</p>
             </div>
-            <div className="contact-options">
-              <a href={band.emailHref} className="contact-row group">
-                <span><span className="contact-label">BOOKINGS & GOOD CONVERSATIONS</span><span className="contact-email">{band.email}</span></span>
-                <span className="contact-arrow"><Icon name="arrowUpRight" size={25} /></span>
-              </a>
-              <a href={band.instagram} target="_blank" rel="noopener noreferrer" className="contact-row contact-instagram">
-                <span className="flex items-center gap-3"><Icon name="instagram" size={22} /><span>More of an Instagram person?<span className="contact-label block">SEND US A MESSAGE</span></span></span>
-                <Icon name="arrowUpRight" size={22} />
-              </a>
-            </div>
+            <ContactLinks />
           </div>
         </section>
       </main>

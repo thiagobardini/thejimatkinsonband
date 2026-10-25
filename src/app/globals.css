@@ -113,18 +113,6 @@ button { cursor: pointer; }
 .session-button { margin-top: 23px; min-height: 48px; }
 .contact-section { padding-block: 75px 80px; border-top: 1px solid #eee9dd19; border-bottom: 1px solid #eee9dd19; background: #142630; }
 .contact-description { color: var(--color-muted); margin-top: 20px; font-size: 14px; line-height: 1.8; }
-.contact-options { align-self: center; }
-.contact-row { display: flex; align-items: center; justify-content: space-between; gap: 18px; padding: 24px; border: 1px solid #a0b0b84d; border-radius: 12px; transition: background .25s, border-color .25s; }
-.contact-row:hover { border-color: #c8ab7980; background: #1d3542; }
-.contact-row + .contact-row { margin-top: 14px; }
-.contact-label { color: var(--color-muted); font-size: 9px; font-weight: 500; letter-spacing: .12em; }
-.contact-email { display: block; margin-top: 10px; font-size: clamp(16px, 2vw, 25px); letter-spacing: -.025em; transition: color .25s; overflow-wrap: anywhere; }
-.contact-row:hover .contact-email { color: var(--color-accent); }
-.contact-arrow { display: inline-grid; place-items: center; flex-shrink: 0; width: 43px; height: 43px; border: 1px solid #c8ab7966; border-radius: 8px; color: var(--color-accent); transition: color .25s, background .25s, transform .3s; }
-.contact-row:hover .contact-arrow { transform: rotate(45deg); background: var(--color-accent); color: var(--color-ink); border-color: var(--color-accent); }
-.contact-instagram { font-size: 13px; color: #c5cfd1; }
-.contact-instagram .contact-label { margin-top: 5px; font-size: 8px; }
-.contact-instagram:hover { color: var(--color-accent); }
 .site-footer { padding-top: 38px; padding-bottom: 25px; font-size: 10px; color: #91a5b1; }
 .footer-brand { display: block; width: 176px; border: 0; background: transparent; }
 .footer-socials { text-align: center; }
@@ -181,11 +169,6 @@ button { cursor: pointer; }
   .contact-section { padding-block: 51px 52px; }
   .contact-section > div { gap: 29px; }
   .contact-description { font-size: 13px; margin-top: 16px; }
-  .contact-row { padding: 18px 16px; gap: 12px; }
-  .contact-email { font-size: 20px; }
-  .contact-options { width: 100%; min-width: 0; }
-  .contact-label { font-size: 8px; }
-  .contact-instagram { font-size: 12px; }
   .site-footer { padding-top: 31px; padding-bottom: 24px; }
   .footer-main { gap: 20px; }
   .footer-brand { width: 144px; }
@@ -210,9 +193,6 @@ button { cursor: pointer; }
   .social-channels { column-gap: 10px; }
   .social-channel { font-size: 12px; }
   .button { padding-inline: 10px; gap: 8px; font-size: 11px; }
-  .contact-row { padding: 18px 13px; gap: 8px; }
-  .contact-email { font-size: 16px; }
-  .contact-arrow { width: 34px; height: 34px; }
 }
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }

@@ -1,0 +1,110 @@
+.options {
+  container-type: inline-size;
+  align-self: center;
+  width: 100%;
+  min-width: 0;
+}
+
+.link {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 1rem;
+  min-height: 44px;
+  color: var(--color-paper);
+  transition: color 250ms ease;
+}
+
+.copy {
+  display: block;
+  min-width: 0;
+}
+
+.emailLink {
+  padding-block: .375rem 1.625rem;
+  border-bottom: 1px solid #eee9dd29;
+}
+
+.label {
+  display: block;
+  color: var(--color-accent);
+  font-size: .5625rem;
+  font-weight: 500;
+  line-height: 1.6;
+  letter-spacing: .13em;
+  text-transform: uppercase;
+}
+
+.email {
+  display: block;
+  margin-top: .75rem;
+  font-size: clamp(1.125rem, 5cqw, 1.8125rem);
+  font-weight: 400;
+  line-height: 1.4;
+  letter-spacing: -.035em;
+  overflow-wrap: anywhere;
+}
+
+.arrow {
+  color: var(--color-accent);
+  transition: transform 250ms ease;
+}
+
+.emailLink > .arrow { align-self: end; margin-bottom: .5rem; }
+
+.instagramLink { padding-block: 1.625rem .375rem; }
+
+.instagramContent {
+  display: flex;
+  align-items: center;
+  gap: .875rem;
+  min-width: 0;
+}
+
+.instagramIcon { flex-shrink: 0; color: var(--color-accent); }
+
+.instagramText {
+  display: block;
+  font-size: 1rem;
+  line-height: 1.5;
+  letter-spacing: -.015em;
+  text-wrap: pretty;
+}
+
+.message {
+  display: block;
+  margin-top: .375rem;
+  color: var(--color-muted);
+  font-size: .5625rem;
+  font-weight: 500;
+  line-height: 1.6;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .link:hover { color: var(--color-accent); }
+  .link:hover .arrow { transform: translate(3px, -3px); }
+}
+
+.link:active { color: var(--color-accent); }
+.link:active .arrow { transform: translate(1px, -1px); }
+
+@media (max-width: 767px) {
+  .email { font-size: clamp(1.0625rem, 5.2vw, 1.5rem); }
+  .emailLink { padding-bottom: 1.375rem; }
+  .instagramLink { padding-top: 1.375rem; }
+  .instagramText { font-size: .9375rem; }
+}
+
+@media (max-width: 359px) {
+  .link { gap: .625rem; }
+  .instagramContent { gap: .625rem; }
+  .instagramText { font-size: .8125rem; }
+  .label, .message { font-size: .5rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .link, .arrow { transition: none; }
+  .link:hover .arrow, .link:active .arrow { transform: none; }
+}
