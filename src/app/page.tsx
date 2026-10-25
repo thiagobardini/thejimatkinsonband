@@ -6,6 +6,7 @@ import { MagneticLink } from "@/components/magnetic-link";
 import { MobileMenu } from "@/components/mobile-menu";
 import { band, bluesDeluxeSession, socialLinks } from "@/lib/band";
 import bluesDeluxeArtwork from "../../public/images/blues-deluxe-2026-10-24.jpg";
+import legacyLogo from "../../public/brand/band-legacy-logo.jpg";
 
 export default function Home() {
   return (
@@ -71,6 +72,16 @@ export default function Home() {
             <p>From the first note to the last encore, we play for music lovers of all ages. You’ll find us on stages across Central and Eastern Massachusetts.</p>
             <a href={band.events} target="_blank" rel="noopener noreferrer" className="inline-link inline-flex items-center gap-4">Find our next show on Facebook <Icon name="arrowUpRight" size={19} /></a>
           </div>
+          <figure className="legacy-mark">
+            <div className="legacy-artwork">
+              <Image src={legacyLogo} alt="An earlier Jim Atkinson Band logo with the initials JAB, a guitar headstock, and an illustrated saxophone player." unoptimized />
+            </div>
+            <figcaption>
+              <p className="eyebrow legacy-label">FROM THE BAND’S ARCHIVE</p>
+              <p className="legacy-title font-display">Part of our story.</p>
+              <p className="legacy-caption">An earlier Jim Atkinson Band logo.</p>
+            </figcaption>
+          </figure>
         </section>
 
         <section id="history" aria-labelledby="history-title" className="history-section mx-auto max-w-[1400px] px-5 md:px-10 lg:px-16">
