@@ -68,6 +68,7 @@
   .kicker { margin-bottom: 10px; font-size: 8px; }
   .heading h2 { font-size: 36px; }
   .scrollHint { font-size: 7px; letter-spacing: 0.1em; max-width: 90px; line-height: 1.6; gap: 8px; }
+  .scrollHintLabel { display: none; }
   .stage { position: relative; top: auto; width: calc(100% - 40px); }
   .screen { height: max(214px, calc((100vw - 40px) * 0.5625)); min-height: 214px; }
   .track { min-height: auto; }

@@ -210,7 +210,7 @@ export function LivePerformance() {
         {playback === "error" ? (
           <a href={videoHref} target="_blank" rel="noopener noreferrer" className={styles.fallback}>Watch on YouTube <Icon name="arrowUpRight" size={18} /><span className="sr-only"> (opens in a new tab)</span></a>
         ) : (
-          <span className={styles.scrollHint}>SCROLL TO EXPAND <Icon name="arrowDown" size={15} /></span>
+          <span className={styles.scrollHint}><span className={styles.scrollHintLabel}>SCROLL TO EXPAND</span><Icon name="arrowDown" size={15} /></span>
         )}
       </div>
       <div ref={track} className={styles.track}>
