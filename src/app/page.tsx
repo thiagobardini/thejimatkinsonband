@@ -9,6 +9,8 @@ import { band, bluesDeluxeSession, socialLinks } from "@/lib/band";
 import bluesDeluxeArtwork from "../../public/images/blues-deluxe-2026-10-24.jpg";
 import legacyLogo from "../../public/brand/band-legacy-logo.png";
 import { ContactLinks } from "@/components/contact-links";
+import { LivePerformance } from "@/components/live-performance";
+import { SectionReveal } from "@/components/section-reveal";
 
 export default function Home() {
   return (
@@ -48,7 +50,7 @@ export default function Home() {
               <div className="est-seal" aria-label="Making music in Massachusetts since 2017"><span>EST.</span><strong>2017</strong><span><span className="hidden md:inline">MASSACHUSETTS</span><span className="md:hidden">MA</span></span></div>
               <div className="hero-socials intro-reveal">
                 <nav aria-label="Watch and follow the band" className="social-channels flex flex-wrap items-center gap-x-5">
-                  <a href={band.youtube} target="_blank" rel="noopener noreferrer" aria-label="Watch us play — The Jim Atkinson Band on YouTube (opens in a new tab)" className="social-channel inline-flex items-center gap-2"><Icon name="youtube" size={18} /><span>Watch us play</span></a>
+                  <a href="#watch" aria-label="Watch us play — live performance" className="social-channel inline-flex items-center gap-2"><Icon name="youtube" size={18} /><span>Watch us play</span></a>
                   {socialLinks.filter((social) => social.icon !== "youtube").map((social) => (
                     <a key={social.name} className="social-channel inline-flex items-center gap-2" href={social.href} target="_blank" rel="noopener noreferrer" aria-label={`${social.name} — The Jim Atkinson Band (opens in a new tab)`}>
                       <Icon name={social.icon} size={18} /><span>{social.name}</span>
@@ -65,6 +67,7 @@ export default function Home() {
           </div>
         </section>
 
+        <SectionReveal>
         <section id="the-band" aria-labelledby="about-title" className="about-section mx-auto grid max-w-[1400px] grid-cols-1 gap-8 px-5 md:grid-cols-[1fr_1.1fr] md:gap-16 md:px-10 lg:px-16">
           <div>
             <p className="eyebrow section-label"><span className="accent-dot" /> A LITTLE ABOUT US</p>
@@ -77,7 +80,9 @@ export default function Home() {
             <a href={band.events} target="_blank" rel="noopener noreferrer" className="inline-link inline-flex items-center gap-4">Find our next show on Facebook <Icon name="arrowUpRight" size={19} /></a>
           </div>
         </section>
+        </SectionReveal>
 
+        <SectionReveal>
         <section id="history" aria-labelledby="history-title" className="history-section mx-auto max-w-[1400px] px-5 md:px-10 lg:px-16">
           <div className="history-heading flex flex-wrap items-end justify-between gap-4">
             <div>
@@ -100,7 +105,11 @@ export default function Home() {
             </div>
           </article>
         </section>
+        </SectionReveal>
 
+        <LivePerformance />
+
+        <SectionReveal>
         <section id="contact" aria-labelledby="contact-title" className="contact-section">
           <div className="mx-auto grid max-w-[1400px] grid-cols-1 gap-10 px-5 md:grid-cols-[1fr_1.1fr] md:gap-16 md:px-10 lg:px-16">
             <div>
@@ -111,6 +120,7 @@ export default function Home() {
             <ContactLinks />
           </div>
         </section>
+        </SectionReveal>
       </main>
 
       <footer className="site-footer mx-auto max-w-[1400px] px-5 md:px-10 lg:px-16">
