@@ -34,7 +34,7 @@ export default function Home() {
               <span className="hero-music-rhythms block">New Orleans rhythms.</span>
             </h1>
             <div className="hero-description intro-reveal">
-              <p className="hero-subline">Good music. Good company.<span className="hidden md:inline"> Since 2017.</span></p>
+              <p className="hero-subline">Good music. Good company.</p>
             </div>
             <div className="hero-actions intro-reveal flex flex-wrap items-center gap-x-6 gap-y-3">
               <MagneticLink href={band.emailHref} className="hero-booking inline-flex items-center gap-3"><span>Book the band</span><Icon name="arrowUpRight" size={18} /></MagneticLink>
