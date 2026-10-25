@@ -1,0 +1,61 @@
+.atmosphere {
+  position: absolute;
+  z-index: -1;
+  inset: 0 0 77px;
+  overflow: hidden;
+  pointer-events: none;
+  user-select: none;
+  mix-blend-mode: screen;
+  /* Keep the light in the negative space, clear of the musicians' faces. */
+  mask-image:
+    linear-gradient(180deg, transparent, #000 16%, #000 76%, transparent),
+    radial-gradient(ellipse 58% 76% at 0% 82%, #000 8%, transparent 86%),
+    radial-gradient(ellipse 47% 30% at 92% 100%, #000 0%, transparent 88%);
+  mask-composite: intersect, add;
+}
+
+.still {
+  position: absolute;
+  inset: 0;
+  opacity: 0.11;
+  background:
+    radial-gradient(ellipse at 12% 65%, #176981 0%, transparent 62%),
+    radial-gradient(ellipse at 74% 88%, #b58345 0%, transparent 48%);
+}
+
+.field {
+  position: absolute;
+  inset: 0 auto auto 0;
+  /* Render at half size: soft light needs fewer pixels than the photo. */
+  width: 50%;
+  height: 50%;
+  transform: scale(2);
+  transform-origin: top left;
+  opacity: 0.44;
+  animation: light-arrives 2.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes light-arrives {
+  from { opacity: 0; }
+  to { opacity: 0.44; }
+}
+
+@media (max-width: 767px) {
+  .atmosphere {
+    bottom: 66px;
+    mask-image: linear-gradient(180deg, transparent 32%, #0009 56%, #000 78%, transparent 100%);
+    mask-composite: add;
+  }
+
+  .still { opacity: 0.09; }
+  .field { opacity: 0.3; animation-name: light-arrives-mobile; }
+
+  @keyframes light-arrives-mobile {
+    from { opacity: 0; }
+    to { opacity: 0.3; }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .field { display: none; animation: none; }
+}

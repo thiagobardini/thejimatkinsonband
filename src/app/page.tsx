@@ -1,6 +1,7 @@
 import Image from "next/image";
 import { BandLogo } from "@/components/band-logo";
 import { HeroPhoto } from "@/components/hero-photo";
+import { HeroAtmosphere } from "@/components/hero-atmosphere";
 import { Icon } from "@/components/icon";
 import { MagneticLink } from "@/components/magnetic-link";
 import { MobileMenu } from "@/components/mobile-menu";
@@ -29,6 +30,7 @@ export default function Home() {
       <main id="main">
         <section aria-labelledby="hero-title" className="hero relative mx-auto max-w-[1400px]">
           <div className="hero-visual"><HeroPhoto /></div>
+          <HeroAtmosphere />
           <div className="hero-copy px-5 md:px-10 lg:px-16">
             <p className="eyebrow hero-eyebrow intro-reveal flex items-center gap-3"><span className="short-rule" /><span className="hidden md:inline">A LITTLE GRIT. A WHOLE LOT OF SOUL.</span><span className="md:hidden">MASSACHUSETTS · EST. 2017</span></p>
             <h1 id="hero-title" className="hero-title intro-reveal">
