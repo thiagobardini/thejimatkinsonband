@@ -76,7 +76,7 @@ export default function Home() {
           </div>
           <div className="about-copy">
             <span className="about-emblem"><Image src={legacyLogo} alt="Jim Atkinson Band JAB emblem" unoptimized /></span>
-            <p>Since 2017, The Jim Atkinson Band has been bringing people together through a unique blend of blues, rock, New Orleans rhythms, and a little something extra.</p>
+            <p>Since 2017, The Jim Atkinson Band has been bringing people together through a unique blend of blues, rock, and roots music, with a little something extra.</p>
             <p>From the first note to the last encore, we play for music lovers of all ages. You’ll find us on stages across Central and Eastern Massachusetts.</p>
             <a href={band.events} target="_blank" rel="noopener noreferrer" className="inline-link inline-flex items-center gap-4">Find our next show on Facebook <Icon name="arrowUpRight" size={19} /></a>
           </div>

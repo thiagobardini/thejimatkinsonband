@@ -12,17 +12,17 @@ const siteOrigin = process.env.SITE_URL
 export const metadata: Metadata = {
   metadataBase: new URL(siteOrigin),
   applicationName: "The Jim Atkinson Band",
-  title: "The Jim Atkinson Band | Blues, Rock & New Orleans Rhythms",
-  description: "Good music. Good company. The Jim Atkinson Band brings blues, rock, and New Orleans rhythms to Central and Eastern Massachusetts. Get in touch for bookings.",
+  title: "The Jim Atkinson Band | Blues, Rock & Roots Music",
+  description: "Good music. Good company. The Jim Atkinson Band brings blues, rock, and roots music to Central and Eastern Massachusetts. Get in touch for bookings.",
   openGraph: {
     title: "The Jim Atkinson Band",
     siteName: "The Jim Atkinson Band",
     url: "/",
-    description: "Blues. Rock. New Orleans rhythms. Live in Massachusetts since 2017.",
+    description: "Blues. Rock. Roots Music. Live in Massachusetts since 2017.",
     type: "website",
     locale: "en_US",
   },
-  twitter: { card: "summary_large_image", title: "The Jim Atkinson Band", description: "Blues, rock, and New Orleans rhythms. Get in touch for bookings." },
+  twitter: { card: "summary_large_image", title: "The Jim Atkinson Band", description: "Blues, rock, and roots music. Get in touch for bookings." },
   alternates: { canonical: "/" },
   robots: { index: true, follow: true },
 };
