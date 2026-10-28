@@ -7,6 +7,8 @@ import styles from "./band-events.module.css";
 const eastern = "America/New_York";
 const date = new Intl.DateTimeFormat("en-US", { timeZone: eastern, month: "short", day: "numeric", year: "numeric" });
 const shortDate = new Intl.DateTimeFormat("en-US", { timeZone: eastern, weekday: "short", month: "short", day: "numeric" });
+const month = new Intl.DateTimeFormat("en-US", { timeZone: eastern, month: "short" });
+const day = new Intl.DateTimeFormat("en-US", { timeZone: eastern, day: "numeric" });
 const time = new Intl.DateTimeFormat("en-US", { timeZone: eastern, hour: "numeric", minute: "2-digit" });
 
 function showTime(event: BandEvent) {
@@ -38,6 +40,7 @@ export function BandEvents({ events, pastEvents, status }: {
           <EventsCarousel kind="upcoming" events={upcoming.map((event) => ({
             id: event.id, title: event.title, startsAt: event.startsAt,
             dateLabel: shortDate.format(new Date(event.startsAt)), timeLabel: showTime(event),
+            dateMonth: month.format(new Date(event.startsAt)), dateDay: day.format(new Date(event.startsAt)),
             venue: event.venue, location: event.location, coverUrl: event.coverUrl, eventUrl: event.eventUrl,
           }))} />
           <p className={styles.timezone}>Showtimes in Eastern Time.</p>

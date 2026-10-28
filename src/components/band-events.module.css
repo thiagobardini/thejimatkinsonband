@@ -6,12 +6,20 @@
 .upcomingCarousel { min-width: 0; }
 .upcomingCarouselHeading { display: flex; justify-content: flex-end; margin-top: -15px; margin-bottom: 14px; }
 .upcomingCarousel[data-single="true"] .upcomingCarouselHeading { display: none; }
-.upcomingPoster { flex: 0 0 calc((100% - 26px) / 2); min-width: 0; scroll-snap-align: start; }
-.upcomingPoster > a { position: relative; display: block; }
-.upcomingPosterTitle { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; min-height: 2.6em; margin-top: 11px; color: var(--color-paper); font-family: var(--font-display); font-size: clamp(27px, 2.6vw, 34px); font-weight: 400; line-height: 1.3; text-wrap: pretty; overflow-wrap: anywhere; transition: color .25s cubic-bezier(.16, 1, .3, 1); }
-.upcomingPoster a:hover .upcomingPosterTitle { color: var(--color-accent); }
-.posterTime { margin-top: 7px; color: #a0b0b8; font-size: 12px; }
-.nextShow { display: inline-block; margin-right: 10px; color: var(--color-paper); font-size: 9px; letter-spacing: .13em; }
+.upcomingRail { scroll-snap-type: x mandatory; }
+.upcomingPoster { flex: 0 0 100%; min-width: 0; scroll-snap-align: start; }
+.upcomingPoster > a { position: relative; display: grid; grid-template-columns: 62px minmax(0, 1.1fr) minmax(0, .9fr) 24px; align-items: center; gap: 30px; min-width: 0; }
+.dateStamp { display: flex; flex-direction: column; gap: 2px; color: var(--color-accent); }
+.dateStamp > span { font-size: 11px; letter-spacing: .18em; text-transform: uppercase; }
+.dateStamp strong { color: var(--color-paper); font-family: var(--font-display); font-size: 57px; font-weight: 400; line-height: 1.15; }
+.upcomingCopy { min-width: 0; }
+.dateLine { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 15px; color: var(--color-accent); font-size: 11px; letter-spacing: .025em; }
+.dateLine > span { color: var(--color-muted); }
+.upcomingCopy h3 { margin-top: 12px; color: var(--color-paper); font-family: var(--font-display); font-size: clamp(28px, 2.7vw, 38px); line-height: 1.25; font-weight: 400; text-wrap: pretty; overflow-wrap: anywhere; transition: color .25s cubic-bezier(.16, 1, .3, 1); }
+.upcomingPoster a:hover h3 { color: var(--color-accent); }
+.eventDetails { display: inline-flex; align-items: center; gap: 8px; min-height: 36px; margin-top: 8px; color: var(--color-paper); font-size: 11px; }
+.rowArrow { color: var(--color-muted); transition: transform .3s cubic-bezier(.16, 1, .3, 1), color .3s cubic-bezier(.16, 1, .3, 1); }
+.upcomingPoster a:hover .rowArrow { transform: translate(3px, -3px); color: var(--color-accent); }
 .artwork { display: block; position: relative; width: 100%; min-width: 0; overflow: hidden; aspect-ratio: 1200 / 630; background: #09171f; }
 .artwork img { display: block; width: 100%; height: 100%; object-fit: contain; opacity: 1; transition: opacity .5s cubic-bezier(.16, 1, .3, 1), transform .65s cubic-bezier(.16, 1, .3, 1); }
 .artwork[data-loading="true"] img { opacity: 0; }
@@ -51,7 +59,8 @@
 .pastShow p { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; margin-top: 7px; color: #8da1ad; font-size: 12px; line-height: 1.6; overflow-wrap: anywhere; }
 
 @media (min-width: 768px) and (max-width: 1023px) {
-  .upcomingPoster { flex-basis: calc((100% - 26px) / 1.6); }
+  .upcomingPoster > a { grid-template-columns: 46px minmax(0, 1fr) minmax(0, .9fr); gap: 22px; }
+  .rowArrow { display: none; }
   .pastShow { flex-basis: calc((100% - 26px) / 2.2); }
 }
 @media (max-width: 767px) {
@@ -60,9 +69,16 @@
   .heading h2 { margin-top: 16px; }
   .textLink { font-size: 12px; }
   .upcomingCarouselHeading { margin-top: -7px; margin-bottom: 10px; }
-  .upcomingPoster { flex-basis: 88%; }
-  .upcomingRail[data-single="true"] .upcomingPoster { flex-basis: 100%; }
-  .upcomingPosterTitle { margin-top: 10px; font-size: 27px; }
+  .upcomingPoster > a { grid-template-columns: 43px minmax(0, 1fr); align-items: start; gap: 22px 20px; }
+  .rowArrow { display: none; }
+  .upcomingPoster .artwork { grid-column: 1 / -1; grid-row: 1; }
+  .dateStamp { grid-column: 1; grid-row: 2; gap: 4px; padding-top: 2px; }
+  .dateStamp > span { font-size: 9px; }
+  .dateStamp strong { font-size: 41px; }
+  .upcomingCopy { grid-column: 2; grid-row: 2; }
+  .dateLine { gap: 4px 10px; font-size: 10px; }
+  .upcomingCopy h3 { margin-top: 9px; font-size: 28px; }
+  .eventDetails { margin-top: 3px; font-size: 11px; }
   .venue { margin-top: 9px; font-size: 12px; line-height: 1.6; }
   .timezone { margin-top: 18px; font-size: 9px; }
   .archive { margin-top: 42px; padding-top: 32px; }
@@ -77,7 +93,7 @@
   .artworkFallback > span { font-size: 6px; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .artwork img, .upcomingPosterTitle { transition: none; }
+  .artwork img, .upcomingCopy h3, .rowArrow { transition: none; }
   .artworkLoading::before, .artworkLoading > span::after { animation: none; }
   .artworkLoading > span::after { transform: scaleX(.5); }
 }

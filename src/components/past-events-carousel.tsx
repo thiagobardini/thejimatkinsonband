@@ -10,6 +10,8 @@ export type CarouselShow = {
   title: string;
   startsAt: string;
   dateLabel: string;
+  dateMonth?: string;
+  dateDay?: string;
   venue: string | null;
   location?: string | null;
   timeLabel?: string;
@@ -46,8 +48,11 @@ export function EventsCarousel({ events, kind, heading }: {
   function move(direction: number) {
     const element = rail.current;
     if (!element) return;
+    const distance = upcoming && element.firstElementChild
+      ? element.firstElementChild.getBoundingClientRect().width + (parseFloat(window.getComputedStyle(element).columnGap) || 0)
+      : element.clientWidth * .85;
     element.scrollBy({
-      left: direction * element.clientWidth * .85,
+      left: direction * distance,
       behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
     });
   }
@@ -78,19 +83,32 @@ export function EventsCarousel({ events, kind, heading }: {
             event.preventDefault(); rail.current?.scrollTo({ left: event.key === "Home" ? 0 : rail.current.scrollWidth, behavior: "auto" });
           }
         }}>
-        {events.map((event, index) => (
+        {events.map((event) => (
           <li key={event.id} className={upcoming ? styles.upcomingPoster : styles.pastShow}>
             <a href={event.eventUrl} target="_blank" rel="noopener noreferrer">
-              <EventArtwork src={event.coverUrl} />
-              <div className={styles.pastMeta}>
-                <time dateTime={event.startsAt}>{upcoming && index === 0 && <span className={styles.nextShow}>UP NEXT</span>}{event.dateLabel}</time>
-                <Icon name="arrowUpRight" size={17} />
-              </div>
-              {event.timeLabel && <p className={styles.posterTime}>{event.timeLabel}</p>}
-              {upcoming ? <h3 className={styles.upcomingPosterTitle}>{event.title}</h3> : <h4>{event.title}</h4>}
-              {(event.venue || event.location) && <p className={upcoming ? styles.venue : undefined}>
-                {event.venue}{event.venue && event.location && " · "}{event.location}
-              </p>}
+              {upcoming ? (
+                <>
+                  <span className={styles.dateStamp} aria-hidden="true"><span>{event.dateMonth}</span><strong>{event.dateDay}</strong></span>
+                  <EventArtwork src={event.coverUrl} />
+                  <div className={styles.upcomingCopy}>
+                    <p className={styles.dateLine}><time dateTime={event.startsAt}>{event.dateLabel}</time>{event.timeLabel && <span>{event.timeLabel}</span>}</p>
+                    <h3>{event.title}</h3>
+                    {(event.venue || event.location) && <p className={styles.venue}>{event.venue}{event.venue && event.location && <span> · </span>}{event.location}</p>}
+                    <span className={styles.eventDetails}>The details <Icon name="arrowUpRight" size={15} /></span>
+                  </div>
+                  <span className={styles.rowArrow}><Icon name="arrowUpRight" size={24} /></span>
+                </>
+              ) : (
+                <>
+                  <EventArtwork src={event.coverUrl} />
+                  <div className={styles.pastMeta}>
+                    <time dateTime={event.startsAt}>{event.dateLabel}</time>
+                    <Icon name="arrowUpRight" size={17} />
+                  </div>
+                  <h4>{event.title}</h4>
+                  {(event.venue || event.location) && <p>{event.venue}{event.venue && event.location && " · "}{event.location}</p>}
+                </>
+              )}
               <span className="sr-only">View event on Facebook (opens in a new tab).</span>
             </a>
           </li>
