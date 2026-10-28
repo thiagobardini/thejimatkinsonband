@@ -53,7 +53,7 @@ export function EventsCarousel({ events, kind, heading }: {
   }
 
   return (
-    <div className={upcoming ? styles.upcomingCarousel : styles.archive}>
+    <div className={upcoming ? styles.upcomingCarousel : styles.archive} data-single={events.length === 1}>
       <div className={upcoming ? styles.upcomingCarouselHeading : styles.archiveHeading}>
         {heading}
         <div className={styles.controls} role="group" aria-label={`Browse ${kind} shows`}
@@ -81,10 +81,9 @@ export function EventsCarousel({ events, kind, heading }: {
         {events.map((event, index) => (
           <li key={event.id} className={upcoming ? styles.upcomingPoster : styles.pastShow}>
             <a href={event.eventUrl} target="_blank" rel="noopener noreferrer">
-              {upcoming && index === 0 && <span className={styles.nextShow}>UP NEXT</span>}
               <EventArtwork src={event.coverUrl} />
               <div className={styles.pastMeta}>
-                <time dateTime={event.startsAt}>{event.dateLabel}</time>
+                <time dateTime={event.startsAt}>{upcoming && index === 0 && <span className={styles.nextShow}>UP NEXT</span>}{event.dateLabel}</time>
                 <Icon name="arrowUpRight" size={17} />
               </div>
               {event.timeLabel && <p className={styles.posterTime}>{event.timeLabel}</p>}
