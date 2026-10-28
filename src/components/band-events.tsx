@@ -43,6 +43,7 @@ export function BandEvents({ events, pastEvents, status }: {
             dateLabel: shortDate.format(new Date(event.startsAt)), timeLabel: showTime(event),
             dateMonth: month.format(new Date(event.startsAt)), dateDay: day.format(new Date(event.startsAt)),
             venue: event.venue, location: event.location, coverUrl: event.coverUrl, eventUrl: event.eventUrl,
+            attendingCount: event.attendingCount, interestedCount: event.interestedCount,
           }))} />
           <p className={styles.timezone}>Showtimes in Eastern Time.</p>
         </>

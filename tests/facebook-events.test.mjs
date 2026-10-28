@@ -13,6 +13,8 @@ const rawEvent = {
   place: { name: "SSB Clinton", location: { city: "Clinton", state: "Massachusetts" } },
   cover: { source: "https://scontent.example.com/event.jpg?size=large" },
   is_canceled: false,
+  attending_count: 2,
+  interested_count: 8,
 };
 
 async function api() {
@@ -21,7 +23,7 @@ async function api() {
 }
 
 function event(id, startsAt, endsAt = null) {
-  return { id, title: `Show ${id}`, startsAt, endsAt, venue: null, location: null, coverUrl: null, eventUrl: `https://www.facebook.com/events/${id}/` };
+  return { id, title: `Show ${id}`, startsAt, endsAt, venue: null, location: null, coverUrl: null, eventUrl: `https://www.facebook.com/events/${id}/`, attendingCount: null, interestedCount: null };
 }
 
 function fakeFetch(fixtures, calls = []) {
@@ -46,6 +48,8 @@ test("normalizes only public display fields and preserves API offsets", async ()
     location: "Clinton, Massachusetts",
     coverUrl: "https://scontent.example.com/event.jpg?size=large",
     eventUrl: "https://www.facebook.com/events/952642270764299/",
+    attendingCount: 2,
+    interestedCount: 8,
   });
 });
 
@@ -75,9 +79,25 @@ test("missing optional details stay nullable and unsafe cover URLs never reach t
   assert.equal(normalized.venue, null);
   assert.equal(normalized.location, null);
   assert.equal(normalized.coverUrl, null);
+  assert.equal(normalized.attendingCount, null);
+  assert.equal(normalized.interestedCount, null);
   assert.equal(normalizeFacebookEvent({ ...minimal, cover: { source: "javascript:alert(1)" } }).coverUrl, null);
   assert.equal(normalizeFacebookEvent({ ...minimal, cover: { source: "https://name:password@example.com/image.jpg" } }).coverUrl, null);
   assert.equal(normalizeFacebookEvent({ ...minimal, cover: { source: `https://example.com/image.jpg?access_token=${token}&size=small` } }).coverUrl, "https://example.com/image.jpg?size=small");
+});
+
+test("response counts preserve zero and accept only nonnegative safe integers", async () => {
+  const { normalizeFacebookEvent } = await api();
+  for (const [input, expected] of [
+    [0, 0], [2, 2], [Number.MAX_SAFE_INTEGER, 9007199254740991],
+    [undefined, null], [null, null], [-1, null], [1.5, null],
+    [Number.MAX_SAFE_INTEGER + 1, null], [Infinity, null], [NaN, null],
+    ["8", null], [false, null], [{ count: 8 }, null],
+  ]) {
+    const normalized = normalizeFacebookEvent({ ...rawEvent, attending_count: input, interested_count: input });
+    assert.equal(normalized.attendingCount, expected);
+    assert.equal(normalized.interestedCount, expected);
+  }
 });
 
 test("partitions and sorts without mutation, keeping an overnight show until its end", async () => {
@@ -121,15 +141,18 @@ test("follows only returned cursors on the trusted Graph endpoint with cached he
   const calls = [];
   const result = await readFacebookEvents({ token, fetcher: fakeFetch([
     { data: [rawEvent], paging: { next: `https://evil.example/steal?access_token=${token}`, cursors: { after: "cursor+one&two" } } },
-    { data: [{ ...rawEvent, id: "123", name: "Earlier", start_time: "2026-10-24T15:00:00-0400", end_time: "2026-10-24T18:00:00-0400" }, rawEvent] },
+    { data: [{ ...rawEvent, id: "123", name: "Earlier", start_time: "2026-10-24T15:00:00-0400", end_time: "2026-10-24T18:00:00-0400", attending_count: 0, interested_count: null }, rawEvent] },
   ], calls) });
   assert.equal(result.status, "connected");
   assert.deepEqual(result.events.map((item) => item.id), ["123", "952642270764299"]);
+  assert.deepEqual(result.events.map((item) => [item.attendingCount, item.interestedCount]), [[0, null], [2, 8]]);
   assert.equal(calls.length, 2);
   for (const { url, init } of calls) {
     assert.equal(url.origin, "https://graph.facebook.com");
     assert.equal(url.pathname, `/v26.0/${pageId}/events`);
     assert.equal(url.searchParams.get("limit"), "50");
+    assert.ok(url.searchParams.get("fields").split(",").includes("attending_count"));
+    assert.ok(url.searchParams.get("fields").split(",").includes("interested_count"));
     assert.equal(url.searchParams.has("access_token"), false);
     assert.equal(init.method, "GET");
     assert.equal(init.headers.Authorization, `Bearer ${token}`);
@@ -186,6 +209,58 @@ test("cancellation is requested and an unsupported optional field gets one scope
   assert.equal(calls.length, 2);
   const denied = await readFacebookEvents({ token, fetcher: fakeFetch([{ status: 400, body: { error: { code: 100, message: "Unsupported get request" } } }]) });
   assert.equal(denied.status, "unavailable");
+});
+
+test("unsupported optional fields fall back individually and remain removed across three pages", async () => {
+  const { readFacebookEvents } = await api();
+  const calls = [];
+  const unsupported = (field) => ({ status: 400, body: { error: { code: 100, message: `Tried accessing nonexisting field (${field}) on node type (Event)` } } });
+  const noOptionalFields = { ...rawEvent, attending_count: undefined, interested_count: undefined, is_canceled: undefined };
+  const result = await readFacebookEvents({ token, fetcher: fakeFetch([
+    unsupported("attending_count"),
+    unsupported("is_canceled"),
+    unsupported("interested_count"),
+    ...["1", "2", "3"].map((id) => ({ data: [{ ...noOptionalFields, id }], paging: { next: `https://ignored.example/?access_token=${token}`, cursors: { after: `cursor${id}` } } })),
+  ], calls) });
+  assert.equal(result.status, "connected");
+  assert.equal(calls.length, 6);
+  assert.deepEqual(result.events.map((item) => [item.attendingCount, item.interestedCount]), [[null, null], [null, null], [null, null]]);
+  const requestedFields = calls.map(({ url }) => url.searchParams.get("fields").split(","));
+  assert.ok(requestedFields[0].includes("attending_count"));
+  assert.ok(requestedFields[1].includes("interested_count"));
+  assert.ok(requestedFields[1].includes("is_canceled"));
+  assert.ok(requestedFields[2].includes("interested_count"));
+  for (const fields of requestedFields.slice(1)) assert.equal(fields.includes("attending_count"), false);
+  for (const fields of requestedFields.slice(2)) assert.equal(fields.includes("is_canceled"), false);
+  for (const fields of requestedFields.slice(3)) assert.equal(fields.includes("interested_count"), false);
+  assert.deepEqual(calls.map(({ url }) => url.searchParams.get("after")), [null, null, null, null, "cursor1", "cursor2"]);
+  assert.equal(JSON.stringify(result).includes(token), false);
+});
+
+test("a repeated unsupported field stops retrying after its single removal", async () => {
+  const { readFacebookEvents } = await api();
+  const calls = [];
+  const failure = { status: 400, body: { error: { code: 100, message: "Unknown field: attending_count" } } };
+  const result = await readFacebookEvents({ token, fetcher: fakeFetch([failure, failure], calls) });
+  assert.deepEqual(result, { status: "unavailable", events: [] });
+  assert.equal(calls.length, 2);
+});
+
+test("count fallback never retries unrelated fields, similarly named fields, or permission errors", async () => {
+  const { readFacebookEvents } = await api();
+  for (const error of [
+    { code: 100, message: "Tried accessing nonexisting field (attending_count_extra) on node type (Event)" },
+    { code: 100, message: "Tried accessing nonexisting field (name) on node type (Event); requested attending_count" },
+    { code: 100, message: "Unsupported get request for attending_count" },
+    { code: 100, message: "Permission denied for field attending_count" },
+    { code: 190, message: "Tried accessing nonexisting field (attending_count) on node type (Event)" },
+    { code: 200, message: "Unknown field: interested_count" },
+  ]) {
+    const calls = [];
+    const result = await readFacebookEvents({ token, fetcher: fakeFetch([{ status: 400, body: { error } }], calls) });
+    assert.deepEqual(result, { status: "unavailable", events: [] });
+    assert.equal(calls.length, 1);
+  }
 });
 
 test("HTTP, Graph, JSON and body timeout failures stay unavailable without throwing secrets", async () => {

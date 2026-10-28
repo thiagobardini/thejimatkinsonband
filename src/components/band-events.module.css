@@ -13,7 +13,6 @@
 .dateStamp > span { font-size: 11px; letter-spacing: .18em; text-transform: uppercase; }
 .dateStamp strong { color: var(--color-paper); font-family: var(--font-display); font-size: 57px; font-weight: 400; line-height: 1.15; }
 .posterLink { display: block; min-width: 0; }
-.eventActions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 24px; margin-top: 8px; }
 .upcomingCopy { min-width: 0; }
 .dateLine { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 15px; color: var(--color-accent); font-size: 11px; letter-spacing: .025em; }
 .dateLine > span { color: var(--color-muted); }
@@ -78,7 +77,6 @@
   .upcomingCopy { grid-column: 2; grid-row: 2; }
   .dateLine { gap: 4px 10px; font-size: 10px; }
   .upcomingCopy h3 { margin-top: 9px; font-size: 28px; }
-  .eventActions { margin-top: 4px; gap: 4px 22px; }
   .venue { margin-top: 9px; font-size: 12px; line-height: 1.6; }
   .timezone { margin-top: 18px; font-size: 9px; }
   .archive { margin-top: 42px; padding-top: 32px; }

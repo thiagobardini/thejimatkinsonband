@@ -20,6 +20,8 @@ export type CarouselShow = {
   timeLabel?: string;
   coverUrl: string | null;
   eventUrl: string;
+  attendingCount?: number | null;
+  interestedCount?: number | null;
   share?: EventShareData;
 };
 
@@ -97,10 +99,10 @@ export function EventsCarousel({ events, kind, heading }: {
                   <p className={styles.dateLine}><time dateTime={event.startsAt}>{event.dateLabel}</time>{event.timeLabel && <span>{event.timeLabel}</span>}</p>
                   <h3><a href={event.eventUrl} target="_blank" rel="noopener noreferrer">{event.title}<span className="sr-only"> on Facebook (opens in a new tab)</span></a></h3>
                   {(event.venue || event.location) && <p className={styles.venue}>{event.venue}{event.venue && event.location && <span> · </span>}{event.location}</p>}
-                  <div className={styles.eventActions}>
-                    <EventRsvp eventUrl={event.eventUrl} title={event.title} />
+                  <EventRsvp eventUrl={event.eventUrl} title={event.title}
+                    attendingCount={event.attendingCount} interestedCount={event.interestedCount}>
                     {event.share && <EventShare share={event.share} imagePath={`/shows/${event.id}/opengraph-image`} coverUrl={event.coverUrl} />}
-                  </div>
+                  </EventRsvp>
                 </div>
                 <a className={styles.rowArrow} href={event.eventUrl} target="_blank" rel="noopener noreferrer" aria-label={`View ${event.title} on Facebook (opens in a new tab)`}><Icon name="arrowUpRight" size={24} /></a>
               </div>

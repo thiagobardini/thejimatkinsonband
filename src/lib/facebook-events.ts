@@ -7,6 +7,8 @@ export type BandEvent = {
   location: string | null;
   coverUrl: string | null;
   eventUrl: string;
+  attendingCount: number | null;
+  interestedCount: number | null;
 };
 
 export type BandEventsResult = {
@@ -16,6 +18,7 @@ export type BandEventsResult = {
 
 export const DEFAULT_FACEBOOK_PAGE_ID = "1813541058730407";
 const EVENT_FIELDS = "id,name,start_time,end_time,place,cover,description";
+const OPTIONAL_EVENT_FIELDS = ["is_canceled", "attending_count", "interested_count"];
 const MAX_PAGES = 3;
 const PAGE_SIZE = 50;
 const easternDate = new Intl.DateTimeFormat("en-US", {
@@ -32,6 +35,10 @@ function text(value: unknown, maxLength = 240): string | null {
   if (typeof value !== "string") return null;
   const cleaned = value.replace(/[\u0000-\u001f\u007f-\u009f]/g, " ").replace(/\s+/g, " ").trim();
   return cleaned ? cleaned.slice(0, maxLength) : null;
+}
+
+function responseCount(value: unknown): number | null {
+  return typeof value === "number" && Number.isSafeInteger(value) && value >= 0 ? value : null;
 }
 
 function apiDate(value: unknown): string | null {
@@ -82,6 +89,8 @@ export function normalizeFacebookEvent(value: unknown): BandEvent | null {
     location: locationLabel || null,
     coverUrl: coverUrl(record(event.cover)?.source),
     eventUrl: `https://www.facebook.com/events/${event.id}/`,
+    attendingCount: responseCount(event.attending_count),
+    interestedCount: responseCount(event.interested_count),
   };
 }
 
@@ -118,20 +127,31 @@ type FacebookReadOptions = {
   fetcher?: FacebookFetcher;
 };
 
+function unsupportedOptionalField(value: unknown, fields: ReadonlySet<string>): string | null {
+  const error = record(value);
+  if (error?.code !== 100 || typeof error.message !== "string") return null;
+  for (const field of fields) {
+    const name = `(?:\\(\\s*${field}\\s*\\)|["']${field}["']|${field}(?![\\w]))`;
+    const unsupported = new RegExp(`(?:nonexisting|nonexistent|unknown|unsupported)\\s+field\\b\\s*:?\\s*${name}|cannot\\s+query\\s+field\\b\\s*:?\\s*${name}|field\\b\\s*:?\\s*${name}\\s+(?:does\\s+not\\s+exist|is\\s+(?:unknown|unsupported|not\\s+supported))`, "i");
+    if (unsupported.test(error.message)) return field;
+  }
+  return null;
+}
+
 export async function readFacebookEvents({ token: suppliedToken, pageId = DEFAULT_FACEBOOK_PAGE_ID, graphVersion = "v26.0", fetcher = fetch }: FacebookReadOptions = {}): Promise<BandEventsResult> {
   const token = suppliedToken?.trim();
   if (!token) return { status: "unconfigured", events: [] };
   if (!/^\d{1,32}$/.test(pageId) || !/^v\d+\.\d+$/.test(graphVersion)) return { status: "unavailable", events: [] };
 
   let after: string | null = null;
-  let cancellationField = true;
+  const optionalFields = new Set(OPTIONAL_EVENT_FIELDS);
   const seenCursors = new Set<string>();
   const rawEvents = new Map<string, unknown>();
   let malformedRecords = 0;
 
   async function readPage() {
     const url = new URL(`https://graph.facebook.com/${graphVersion}/${pageId}/events`);
-    url.searchParams.set("fields", EVENT_FIELDS + (cancellationField ? ",is_canceled" : ""));
+    url.searchParams.set("fields", [EVENT_FIELDS, ...optionalFields].join(","));
     url.searchParams.set("limit", String(PAGE_SIZE));
     if (after !== null) url.searchParams.set("after", after);
     const response = await fetcher(url.href, {
@@ -150,11 +170,12 @@ export async function readFacebookEvents({ token: suppliedToken, pageId = DEFAUL
   try {
     for (let page = 0; page < MAX_PAGES; page += 1) {
       let response = await readPage();
-      const error = record(response.body?.error);
-      if (cancellationField && error?.code === 100 && typeof error.message === "string"
-        && /is_canceled/.test(error.message) && /nonexisting|unknown|unsupported|does not exist|cannot query/i.test(error.message)) {
-        cancellationField = false;
+      let unsupportedField = unsupportedOptionalField(response.body?.error, optionalFields);
+      while (unsupportedField !== null) {
+        // Each optional field can trigger only one retry across the entire read.
+        optionalFields.delete(unsupportedField);
         response = await readPage();
+        unsupportedField = unsupportedOptionalField(response.body?.error, optionalFields);
       }
       if (!response.ok || !response.body || response.body.error || !Array.isArray(response.body.data)) {
         return { status: "unavailable", events: [] };
