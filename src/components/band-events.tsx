@@ -58,7 +58,7 @@ export function BandEvents({ events, pastEvents, status }: {
 
 export function PastShows({ events }: { events: BandEvent[] }) {
   const featuredId = bluesDeluxeSession.eventHref.match(/\/events\/(\d+)/)?.[1];
-  const archive = events.filter((event) => event.id !== featuredId).slice(0, 12);
+  const archive = events.filter((event) => event.id !== featuredId).slice(0, 20);
   if (!archive.length) return null;
 
   return <PastEventsCarousel events={archive.map((event) => ({
