@@ -32,7 +32,7 @@ export default async function Home() {
         <nav aria-label="Main navigation" className="hidden items-center gap-9 lg:flex">
           <a className="nav-link" href="#the-band">The band</a>
           <a className="nav-link" href="#history">Our history</a>
-          <a className="nav-link flex items-center gap-2" href={band.events} target="_blank" rel="noopener noreferrer">Live shows <Icon name="arrowUpRight" size={15} /></a>
+          <a className="nav-link" href="#shows">Live shows</a>
         </nav>
         <a href="#contact" className="header-contact hidden items-center gap-5 lg:inline-flex">Get in touch <Icon name="arrowUpRight" size={19} /></a>
         <MobileMenu />
@@ -53,7 +53,7 @@ export default async function Home() {
             </div>
             <div className="hero-actions intro-reveal flex flex-wrap items-center gap-x-6 gap-y-3">
               <MagneticLink href={band.emailHref} className="hero-booking inline-flex items-center gap-3"><span>Book the band</span><Icon name="arrowUpRight" size={18} /></MagneticLink>
-              <a href={band.events} target="_blank" rel="noopener noreferrer" className="hero-shows inline-flex items-center gap-2">Upcoming shows <Icon name="arrowUpRight" size={16} /></a>
+              <a href="#shows" className="hero-shows inline-flex items-center gap-2">Upcoming shows <Icon name="arrowDown" size={16} /></a>
             </div>
             <div className="hero-community">
               <div className="est-seal" aria-label="Making music in Massachusetts since 2017"><span>EST.</span><strong>2017</strong><span><span className="hidden md:inline">MASSACHUSETTS</span><span className="md:hidden">MA</span></span></div>
@@ -86,7 +86,7 @@ export default async function Home() {
             <span className="about-emblem"><Image src={legacyLogo} alt="Jim Atkinson Band JAB emblem" unoptimized /></span>
             <p>Since 2017, The Jim Atkinson Band has been bringing people together through a unique blend of blues, rock, and roots music, with a little something extra.</p>
             <p>From the first note to the last encore, we play for music lovers of all ages. You’ll find us on stages across Central and Eastern Massachusetts.</p>
-            <a href={band.events} target="_blank" rel="noopener noreferrer" className="inline-link inline-flex items-center gap-4">Find our next show on Facebook <Icon name="arrowUpRight" size={19} /></a>
+            <a href="#shows" className="inline-link inline-flex items-center gap-4">Find our next show <Icon name="arrowDown" size={19} /></a>
           </div>
         </section>
         </SectionReveal>

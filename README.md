@@ -36,7 +36,7 @@ Brand images and fonts are local; Facebook event covers load from the URLs suppl
 
 ## Automatic Facebook events
 
-Upcoming shows and a carousel of recent past shows share one poster-led section after About. The existing Blues Deluxe feature remains in History below it. Event posters link directly to their individual Facebook events. Current hero, About and social links keep their existing destinations.
+Upcoming shows and a carousel of recent past shows share one poster-led section after About. The desktop/mobile “Live shows” menu links, hero “Upcoming shows” and About “Find our next show” scroll to this section (`#shows`). The existing Blues Deluxe feature remains in History below it. Event posters and “See the event” link directly to their individual Facebook events; social links, the full Facebook listing and the unavailable-feed fallback keep their external destinations.
 
 The server reads the Page's `/events` endpoint using these variables, privately in the root `.env.local` during development or in the project's Vercel Environment Variables for Production:
 

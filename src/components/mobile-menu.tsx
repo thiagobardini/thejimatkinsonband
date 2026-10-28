@@ -2,7 +2,6 @@
 
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
-import { band } from "@/lib/band";
 import { Icon } from "./icon";
 
 export function MobileMenu() {
@@ -37,7 +36,7 @@ export function MobileMenu() {
           <motion.nav id="mobile-menu" aria-label="Mobile navigation" className="mobile-menu" initial={{ opacity: 0, y: reducedMotion ? 0 : -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: reducedMotion ? 0 : -8 }} transition={{ type: "spring", stiffness: 100, damping: 20 }} onClick={() => setOpen(false)}>
             <a href="#the-band">The band <Icon name="arrowDown" size={18} /></a>
             <a href="#history">Our history <Icon name="arrowDown" size={18} /></a>
-            <a href={band.events} target="_blank" rel="noopener noreferrer">Live shows <Icon name="arrowUpRight" size={18} /></a>
+            <a href="#shows">Live shows <Icon name="arrowDown" size={18} /></a>
             <a href="#contact">Get in touch <Icon name="arrowDown" size={18} /></a>
           </motion.nav>
         )}
