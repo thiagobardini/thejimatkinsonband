@@ -121,8 +121,8 @@ export function EventsCarousel({ events, kind, heading }: {
 export function PastEventsCarousel({ events }: { events: PastShow[] }) {
   return <EventsCarousel events={events} kind="past" heading={
     <div>
-      <p className={styles.kicker}>PAST SHOWS</p>
-      <h3 id="past-shows-title" className={styles.archiveTitle}>A few stops along the way.</h3>
+      <p className="eyebrow section-label"><span className="accent-dot" aria-hidden="true" /> PAST SHOWS</p>
+      <h3 id="past-shows-title" className={`${styles.archiveTitle} section-title font-display uppercase`}>A few stops along the way.</h3>
     </div>
   } />;
 }
