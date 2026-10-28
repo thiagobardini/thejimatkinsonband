@@ -12,8 +12,16 @@ import { ContactLinks } from "@/components/contact-links";
 import { LivePerformance } from "@/components/live-performance";
 import { SectionReveal } from "@/components/section-reveal";
 import { StudioCredit } from "@/components/studio-credit";
+import { BandEvents } from "@/components/band-events";
+import { getBandEvents } from "@/lib/facebook";
+import { partitionEvents } from "@/lib/facebook-events";
 
-export default function Home() {
+export const revalidate = 900;
+
+export default async function Home() {
+  const feed = await getBandEvents();
+  const { upcoming, past } = partitionEvents(feed.events);
+
   return (
     <>
       <a href="#main" className="skip-link">Skip to content</a>
@@ -81,6 +89,10 @@ export default function Home() {
             <a href={band.events} target="_blank" rel="noopener noreferrer" className="inline-link inline-flex items-center gap-4">Find our next show on Facebook <Icon name="arrowUpRight" size={19} /></a>
           </div>
         </section>
+        </SectionReveal>
+
+        <SectionReveal>
+          <BandEvents events={upcoming} pastEvents={past} status={feed.status} />
         </SectionReveal>
 
         <SectionReveal>

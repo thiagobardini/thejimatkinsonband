@@ -18,7 +18,7 @@ npm run build
 npm start
 ```
 
-Deploy to a Next.js-compatible host. No environment variables are required to run the homepage. The production origin for social sharing is detected automatically on Vercel; on other hosts, set the optional `SITE_URL` environment variable to the site's full public origin, including `https://`.
+Deploy to a Next.js-compatible host. The homepage remains available without Facebook credentials, with a link to the band's latest dates on Facebook. The production origin for social sharing is detected automatically on Vercel; on other hosts, set the optional `SITE_URL` environment variable to the site's full public origin, including `https://`.
 
 ## Content
 
@@ -32,4 +32,52 @@ Deploy to a Next.js-compatible host. No environment variables are required to ru
 - Logo component and sizing: `src/components/band-logo.tsx` and `src/app/globals.css`
 - Favicon, Apple touch icon, and 1200×630 sharing images: generated from the official artwork by `src/lib/brand-images.tsx` and the App Router metadata image routes.
 
-Images and fonts are local. Includes reduced motion support, visible keyboard focus, a skip link, and an accessible mobile menu. Events link to the band's Facebook page.
+Brand images and fonts are local; Facebook event covers load from the URLs supplied by the authorized Page. Includes reduced motion support, visible keyboard focus, a skip link, an accessible mobile menu and a keyboard/touch-friendly show carousel.
+
+## Automatic Facebook events
+
+Upcoming shows and a carousel of recent past shows share one poster-led section after About. The existing Blues Deluxe feature remains in History below it. Event posters link directly to their individual Facebook events. Current hero, About and social links keep their existing destinations.
+
+The server reads the Page's `/events` endpoint using these variables, privately in the root `.env.local` during development or in the project's Vercel Environment Variables for Production:
+
+| Variable | Value |
+| --- | --- |
+| `FACEBOOK_PAGE_ACCESS_TOKEN` | Authorized Page token; use the Vercel **Secret** type |
+| `FACEBOOK_PAGE_ID` | `1813541058730407` (default) |
+| `FACEBOOK_GRAPH_VERSION` | `v26.0` (default) |
+
+Never prefix the token with `NEXT_PUBLIC_`. The server-only adapter does not pass credentials, raw Graph responses or pagination URLs to client components. Only selected public display fields reach the browser. The App ID and Login Configuration ID are not required for this read-only feed.
+
+Successful reads and the homepage revalidate after 900 seconds. Refresh is triggered by visits after the cache interval, so the first visitor can receive the previous version while regeneration runs; this is not an instant webhook or a scheduled import. A new Vercel deployment is required after changing environment variables.
+
+Reads are bounded to three pages of 50 records, then deduplicated and sorted. The interface shows at most six upcoming shows and twelve recent past shows, not a complete archive. Canceled events are omitted when Facebook returns that field. Dates and times use `America/New_York`; an event without an end stays upcoming on its calendar date and becomes past the next day, without an invented end time. Unavailable or malformed responses fall back to Facebook rather than claiming there are no events. Failed or missing covers have a styled fallback.
+
+Facebook credentials can expire or be revoked; saving them in Vercel does not extend their lifetime. Validate the Page token's expiration in Meta before relying on unattended updates, and replace the Vercel Secret and redeploy when reauthorizing.
+
+Implementation: `src/lib/facebook-events.ts`, `src/lib/facebook.ts`, `src/components/band-events.tsx`, `src/components/past-events-carousel.tsx` and `src/components/band-events.module.css`.
+
+```sh
+npm test
+npm run typecheck
+npm run build -- --webpack
+```
+
+The native Node tests require a Node version that can import erasable TypeScript syntax (Node 22.18+).
+
+## Optional Facebook read diagnostic
+
+This local script checks authorized access to the band's Page, up to ten of its own posts, and up to ten events from its `/events` endpoint. It does not change Facebook content, enable a production feed, or require credentials for the homepage to run.
+
+Privately add `FACEBOOK_PAGE_ACCESS_TOKEN` to `.env.local` in the repository root, not inside `src`. That file is ignored by Git. Use a Page access token authorized for the dedicated band app and Page; never use a `NEXT_PUBLIC_` variable for the token, commit it, or paste it into chat. The defaults are the verified Graph API Page ID `1813541058730407` and Graph API `v26.0`; optional overrides are `FACEBOOK_PAGE_ID` and `FACEBOOK_GRAPH_VERSION`. Use the Page ID returned by the API, which can differ from the identifier in the public Facebook profile URL. The site's public social links remain separate from this diagnostic setting.
+
+Run with a Node.js version supporting `--env-file-if-exists`:
+
+```sh
+node --env-file-if-exists=.env.local scripts/check-facebook.mjs
+```
+
+The script sends only GET requests, authenticates through the Authorization header, and uses a 15-second timeout per request. It prints selected public fields and availability indicators, not raw responses, tokens, or pagination URLs. If extended post fields fail, it may retry basic fields once and reports that post event attachments were not validated. Posts and events are checked independently after Page verification, so a post failure does not skip the events check. Error `190` can indicate an invalid or expired token, or a wrong token type; the New Pages Experience can require a Page token where a valid User token is insufficient. Exit codes are `0` when both reads succeed (including empty or basic-only results), `1` if any read fails, and `2` for missing or invalid configuration. Individual results remain visible on partial success.
+
+In the posts report, an event attachment, Facebook event URL, or `created_event` status is evidence of an announcement, not verified show dates. `publishedAt` is the post's publication time; dates inferred from posts remain `null`. Unpublished posts are omitted, an unavailable publication flag is marked as unknown, and repeated post IDs are deduplicated.
+
+The separate events report uses `id,name,start_time,end_time,place,cover,description`, preserving dates and UTC offsets actually returned by Facebook. It includes sanitized venue, cover and description fields, and counts upcoming, ongoing, past and timing-unknown events relative to the reported check time. A started event without a known end time is not automatically marked past. This authorized Page's `/events` endpoint returned real events in the live validation; access still must be checked for each app/token configuration. Each report covers only one page of at most ten results, without following pagination: neither successful reads nor empty results establish a complete archive or guarantee that every event is accessible.
