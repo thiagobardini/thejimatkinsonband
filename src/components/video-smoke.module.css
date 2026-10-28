@@ -9,6 +9,9 @@
 
 .smoke[data-active="true"] {
   opacity: 1;
+  transition-duration: 2400ms;
+  transition-delay: 900ms;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .canvas {
