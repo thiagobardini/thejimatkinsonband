@@ -33,7 +33,6 @@ export function BandEvents({ events, pastEvents, status }: {
           <p className="eyebrow section-label"><span className="accent-dot" /> UPCOMING SHOWS</p>
           <h2 id="shows-title" className="section-title font-display uppercase">Catch us live.</h2>
         </div>
-        <a href={band.events} target="_blank" rel="noopener noreferrer" className={styles.textLink}>All shows on Facebook <Icon name="arrowUpRight" size={16} /></a>
       </div>
       {upcoming.length > 0 ? (
         <>
