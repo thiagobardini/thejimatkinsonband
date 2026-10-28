@@ -222,7 +222,7 @@ export function LivePerformance() {
       <div ref={track} className={styles.track}>
       <div className={styles.stage}>
         <motion.div ref={frame} className={styles.screenShell} style={reduced ? { scale: 1, rotateX: 0, y: 0 } : compact ? { scale: mobileScale, rotateX: 0, y: 0 } : { scale, rotateX, y: rise }} data-playback={playback}>
-          <VideoSmoke active={ready && playback === "playing" && inView && pageVisible && !reduced} />
+          <VideoSmoke boundary={section} active={ready && playback === "playing" && inView && pageVisible && !reduced} />
           <div className={styles.screen}>
             <Image src={`https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`} alt="The Jim Atkinson Band performing live on a brick-walled stage under warm lights" fill unoptimized sizes="100vw" className={styles.poster} />
             <div ref={mount} className={styles.player} hidden={playback === "error"} />

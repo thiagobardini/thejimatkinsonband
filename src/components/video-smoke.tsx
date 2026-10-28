@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, type RefObject } from "react";
 import styles from "./video-smoke.module.css";
 
 const vertexSource = `
@@ -19,6 +19,7 @@ const fragmentSource = `
   varying vec2 v_uv;
   uniform float u_time;
   uniform float u_aspect;
+  uniform vec2 u_top_fade;
 
   float hash(vec2 p) {
     vec3 p3 = fract(vec3(p.xyx) * 0.1031);
@@ -82,7 +83,13 @@ const fragmentSource = `
 
     vec2 feather = smoothstep(vec2(0.0), vec2(0.12), v_uv)
       * smoothstep(vec2(0.0), vec2(0.12), 1.0 - v_uv);
-    float alpha = density * envelope * darkCollar * rising * feather.x * feather.y * 0.56;
+    // Dissipate only the smoke near the section's top, even while the
+    // video and its canvas move independently through the sticky stage.
+    float sectionDepth = ((1.0 - v_uv.y) - u_top_fade.x) / u_top_fade.y;
+    float topDissipation = smoothstep(0.0, 1.0, sectionDepth);
+    topDissipation *= topDissipation;
+    float alpha = density * envelope * darkCollar * rising
+      * feather.x * feather.y * topDissipation * 0.56;
 
     float warmth = clamp((0.5 - v_uv.x) * 0.55 + curl.y * 0.22, 0.0, 0.32);
     vec3 stageLight = mix(vec3(0.42, 0.58, 0.63), vec3(0.69, 0.43, 0.29), warmth);
@@ -97,7 +104,7 @@ type SmokeRenderer = {
   dispose: () => void;
 };
 
-function createRenderer(canvas: HTMLCanvasElement): SmokeRenderer | null {
+function createRenderer(canvas: HTMLCanvasElement, boundary: HTMLElement): SmokeRenderer | null {
   const gl = canvas.getContext("webgl", {
     alpha: true,
     antialias: false,
@@ -159,12 +166,15 @@ function createRenderer(canvas: HTMLCanvasElement): SmokeRenderer | null {
 
   const timeUniform = gl.getUniformLocation(program, "u_time");
   const aspectUniform = gl.getUniformLocation(program, "u_aspect");
+  const topFadeUniform = gl.getUniformLocation(program, "u_top_fade");
+  let fadeDistance = 80;
 
   const resize = () => {
     const width = canvas.clientWidth;
     const height = canvas.clientHeight;
     if (!width || !height) return;
     const mobile = window.matchMedia("(max-width: 767px)").matches;
+    fadeDistance = mobile ? 48 : 80;
     const scale = Math.min(1, (mobile ? 220 : 460) / width, (mobile ? 190 : 300) / height);
     canvas.width = Math.max(1, Math.round(width * scale));
     canvas.height = Math.max(1, Math.round(height * scale));
@@ -175,6 +185,14 @@ function createRenderer(canvas: HTMLCanvasElement): SmokeRenderer | null {
   return {
     resize,
     render(time) {
+      // Read only on the capped draw cadence; no scroll listener or layout writes.
+      const surface = canvas.getBoundingClientRect();
+      if (!surface.height) return;
+      gl.uniform2f(
+        topFadeUniform,
+        (boundary.getBoundingClientRect().top - surface.top) / surface.height,
+        fadeDistance / surface.height,
+      );
       gl.uniform1f(timeUniform, time);
       gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
     },
@@ -183,13 +201,14 @@ function createRenderer(canvas: HTMLCanvasElement): SmokeRenderer | null {
 }
 
 /** Decorative stage haze. Its parent must be the exact size of the video. */
-export function VideoSmoke({ active }: { active: boolean }) {
+export function VideoSmoke({ active, boundary }: { active: boolean; boundary: RefObject<HTMLElement | null> }) {
   const canvas = useRef<HTMLCanvasElement>(null);
   const elapsed = useRef(0);
 
   useEffect(() => {
     const surface = canvas.current;
-    if (!surface || !active) return;
+    const section = boundary.current;
+    if (!surface || !section || !active) return;
 
     const motion = window.matchMedia("(prefers-reduced-motion: reduce)");
     const mobile = window.matchMedia("(max-width: 767px)");
@@ -230,7 +249,7 @@ export function VideoSmoke({ active }: { active: boolean }) {
       }
       if (document.hidden) return;
       if (!renderer) {
-        renderer = createRenderer(surface);
+        renderer = createRenderer(surface, section);
         renderer?.resize();
       }
       if (renderer) frame = requestAnimationFrame(draw);
@@ -265,7 +284,7 @@ export function VideoSmoke({ active }: { active: boolean }) {
       surface.removeEventListener("webglcontextrestored", restoreContext);
       renderer?.dispose();
     };
-  }, [active]);
+  }, [active, boundary]);
 
   return (
     <div className={styles.smoke} data-active={active} aria-hidden="true">
