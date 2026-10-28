@@ -3,22 +3,28 @@ import { existsSync } from "node:fs";
 import test from "node:test";
 
 const locationModule = new URL("../src/lib/event-location.ts", import.meta.url);
+const providers = [
+  { name: "Google Maps", origin: "https://www.google.com", path: "/maps/search/", queryKey: "query", parameterKeys: ["api", "query"] },
+  { name: "Waze", origin: "https://waze.com", path: "/ul", queryKey: "q", parameterKeys: ["q"] },
+  { name: "Apple Maps", origin: "https://maps.apple.com", path: "/search", queryKey: "query", parameterKeys: ["query"] },
+];
 
 async function locations() {
   assert.ok(existsSync(locationModule), "Event map links are not implemented yet");
   return import(locationModule.href);
 }
 
-test("map links combine the trimmed venue and address while preserving the display label", async () => {
+test("all three map choices use the trimmed venue and address while preserving the display label", async () => {
   const { getEventLocation } = await locations();
   const result = getEventLocation({ venue: "  SSB Clinton  ", location: "  175 Sterling St, Clinton, MA 01510  " });
 
   assert.equal(result.label, "SSB Clinton · 175 Sterling St, Clinton, MA 01510");
-  const map = new URL(result.mapUrl);
-  assert.equal(map.origin, "https://www.google.com");
-  assert.equal(map.pathname, "/maps/search/");
-  assert.equal(map.searchParams.get("api"), "1");
-  assert.equal(map.searchParams.get("query"), "SSB Clinton, 175 Sterling St, Clinton, MA 01510");
+  assert.deepEqual(result.links, [
+    { name: "Google Maps", href: "https://www.google.com/maps/search/?api=1&query=SSB+Clinton%2C+175+Sterling+St%2C+Clinton%2C+MA+01510" },
+    { name: "Waze", href: "https://waze.com/ul?q=SSB%20Clinton%2C%20175%20Sterling%20St%2C%20Clinton%2C%20MA%2001510" },
+    { name: "Apple Maps", href: "https://maps.apple.com/search?query=SSB%20Clinton%2C%20175%20Sterling%20St%2C%20Clinton%2C%20MA%2001510" },
+  ]);
+  assert.equal("mapUrl" in result, false);
 });
 
 test("map links use a venue or address on its own without an empty separator", async () => {
@@ -31,7 +37,12 @@ test("map links use a venue or address on its own without an empty separator", a
   ]) {
     const result = getEventLocation(event);
     assert.equal(result.label, label);
-    assert.equal(new URL(result.mapUrl).searchParams.get("query"), label);
+    assert.ok(Array.isArray(result.links), "Map provider choices are available");
+    for (const provider of providers) {
+      const choice = result.links.find((link) => link.name === provider.name);
+      assert.ok(choice, `${provider.name} is available`);
+      assert.equal(new URL(choice.href).searchParams.get(provider.queryKey), label);
+    }
   }
 });
 
@@ -42,23 +53,33 @@ test("missing or blank places do not produce a map link", async () => {
   }
 });
 
-test("map queries preserve Unicode and punctuation without creating extra URL parameters", async () => {
+test("each map choice preserves Unicode and punctuation without creating extra URL parameters", async () => {
   const { getEventLocation } = await locations();
-  const result = getEventLocation({ venue: "Café O'Connor & Sons #2?", location: "12 Main St + Annex, Montréal, QC" });
+  const result = getEventLocation({ venue: "Café O'Connor & Sons #2?", location: "12 Main St + Annex, Montréal, QC %2F" });
 
-  assert.equal(result.label, "Café O'Connor & Sons #2? · 12 Main St + Annex, Montréal, QC");
-  const map = new URL(result.mapUrl);
-  assert.equal(map.searchParams.get("query"), "Café O'Connor & Sons #2?, 12 Main St + Annex, Montréal, QC");
-  assert.deepEqual([...map.searchParams.keys()], ["api", "query"]);
-  assert.equal(map.hash, "");
+  assert.equal(result.label, "Café O'Connor & Sons #2? · 12 Main St + Annex, Montréal, QC %2F");
+  assert.ok(Array.isArray(result.links), "Map provider choices are available");
+  for (const provider of providers) {
+    const map = new URL(result.links.find((link) => link.name === provider.name).href);
+    assert.equal(map.searchParams.get(provider.queryKey), "Café O'Connor & Sons #2?, 12 Main St + Annex, Montréal, QC %2F");
+    assert.deepEqual([...map.searchParams.keys()], provider.parameterKeys);
+    assert.equal(map.hash, "");
+  }
 });
 
-test("URL-shaped place text remains a search query on Google Maps", async () => {
+test("URL-shaped and query-shaped place text cannot replace a provider origin or inject parameters", async () => {
   const { getEventLocation } = await locations();
-  const result = getEventLocation({ location: "https://example.com/venue?destination=elsewhere#place" });
-  const map = new URL(result.mapUrl);
+  const result = getEventLocation({ location: "https://example.com/venue?api=2&url=https://elsewhere.test#place" });
 
-  assert.equal(map.origin, "https://www.google.com");
-  assert.equal(map.pathname, "/maps/search/");
-  assert.equal(map.searchParams.get("query"), "https://example.com/venue?destination=elsewhere#place");
+  assert.ok(Array.isArray(result.links), "Map provider choices are available");
+  for (const provider of providers) {
+    const map = new URL(result.links.find((link) => link.name === provider.name).href);
+    assert.equal(map.origin, provider.origin);
+    assert.equal(map.pathname, provider.path);
+    assert.equal(map.searchParams.get(provider.queryKey), "https://example.com/venue?api=2&url=https://elsewhere.test#place");
+    assert.deepEqual([...map.searchParams.keys()], provider.parameterKeys);
+    assert.equal(map.searchParams.get("url"), null);
+    assert.equal(map.hash, "");
+  }
+  assert.equal(new URL(result.links[0].href).searchParams.get("api"), "1");
 });
