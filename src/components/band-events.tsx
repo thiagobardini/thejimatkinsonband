@@ -1,15 +1,12 @@
 import type { BandEvent } from "@/lib/facebook-events";
 import { band, bluesDeluxeSession } from "@/lib/band";
-import { EventArtwork } from "./event-artwork";
 import { Icon } from "./icon";
-import { PastEventsCarousel } from "./past-events-carousel";
+import { EventsCarousel, PastEventsCarousel } from "./past-events-carousel";
 import styles from "./band-events.module.css";
 
 const eastern = "America/New_York";
 const date = new Intl.DateTimeFormat("en-US", { timeZone: eastern, month: "short", day: "numeric", year: "numeric" });
 const shortDate = new Intl.DateTimeFormat("en-US", { timeZone: eastern, weekday: "short", month: "short", day: "numeric" });
-const month = new Intl.DateTimeFormat("en-US", { timeZone: eastern, month: "short" });
-const day = new Intl.DateTimeFormat("en-US", { timeZone: eastern, day: "numeric" });
 const time = new Intl.DateTimeFormat("en-US", { timeZone: eastern, hour: "numeric", minute: "2-digit" });
 
 function showTime(event: BandEvent) {
@@ -25,6 +22,8 @@ export function BandEvents({ events, pastEvents, status }: {
   pastEvents: BandEvent[];
   status: "connected" | "unavailable" | "unconfigured";
 }) {
+  const upcoming = [...events].sort((a, b) => Date.parse(a.startsAt) - Date.parse(b.startsAt)).slice(0, 6);
+
   return (
     <section id="shows" aria-labelledby="shows-title" className={`${styles.section} mx-auto max-w-[1400px] px-5 md:px-10 lg:px-16`}>
       <div className={styles.heading}>
@@ -34,26 +33,13 @@ export function BandEvents({ events, pastEvents, status }: {
         </div>
         <a href={band.events} target="_blank" rel="noopener noreferrer" className={styles.textLink}>All shows on Facebook <Icon name="arrowUpRight" size={16} /></a>
       </div>
-      {events.length > 0 ? (
+      {upcoming.length > 0 ? (
         <>
-          <ul className={styles.upcomingList}>
-            {events.slice(0, 6).map((event) => (
-              <li key={event.id}>
-                <a className={styles.upcomingShow} href={event.eventUrl} target="_blank" rel="noopener noreferrer">
-                  <span className={styles.dateStamp} aria-hidden="true"><span>{month.format(new Date(event.startsAt))}</span><strong>{day.format(new Date(event.startsAt))}</strong></span>
-                  <EventArtwork src={event.coverUrl} />
-                  <div className={styles.upcomingCopy}>
-                    <p className={styles.dateLine}><time dateTime={event.startsAt}>{shortDate.format(new Date(event.startsAt))}</time><span>{showTime(event)}</span></p>
-                    <h3>{event.title}</h3>
-                    {(event.venue || event.location) && <p className={styles.venue}>{event.venue}{event.venue && event.location && <span> · </span>}{event.location}</p>}
-                    <span className={styles.eventDetails}>The details <Icon name="arrowUpRight" size={15} /></span>
-                  </div>
-                  <span className={styles.rowArrow}><Icon name="arrowUpRight" size={24} /></span>
-                  <span className="sr-only">View event on Facebook (opens in a new tab).</span>
-                </a>
-              </li>
-            ))}
-          </ul>
+          <EventsCarousel kind="upcoming" events={upcoming.map((event) => ({
+            id: event.id, title: event.title, startsAt: event.startsAt,
+            dateLabel: shortDate.format(new Date(event.startsAt)), timeLabel: showTime(event),
+            venue: event.venue, location: event.location, coverUrl: event.coverUrl, eventUrl: event.eventUrl,
+          }))} />
           <p className={styles.timezone}>Showtimes in Eastern Time.</p>
         </>
       ) : (
