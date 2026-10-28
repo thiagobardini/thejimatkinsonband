@@ -5,6 +5,7 @@ import { EventShare } from "./event-share";
 import type { EventShareData } from "@/lib/event-sharing";
 import { EventArtwork } from "./event-artwork";
 import { EventRsvp } from "./event-rsvp";
+import { EventLocation } from "./event-location";
 import { Icon } from "./icon";
 import styles from "./band-events.module.css";
 
@@ -23,6 +24,7 @@ export type CarouselShow = {
   attendingCount?: number | null;
   interestedCount?: number | null;
   share?: EventShareData;
+  shareDateLabel?: string;
 };
 
 export type PastShow = CarouselShow;
@@ -98,10 +100,11 @@ export function EventsCarousel({ events, kind, heading }: {
                 <div className={styles.upcomingCopy}>
                   <p className={styles.dateLine}><time dateTime={event.startsAt}>{event.dateLabel}</time>{event.timeLabel && <span>{event.timeLabel}</span>}</p>
                   <h3><a href={event.eventUrl} target="_blank" rel="noopener noreferrer">{event.title}<span className="sr-only"> on Facebook (opens in a new tab)</span></a></h3>
-                  {(event.venue || event.location) && <p className={styles.venue}>{event.venue}{event.venue && event.location && <span> · </span>}{event.location}</p>}
+                  {(event.venue || event.location) && <p className={styles.venue}><EventLocation venue={event.venue} location={event.location} /></p>}
                   <EventRsvp eventUrl={event.eventUrl} title={event.title}
                     attendingCount={event.attendingCount} interestedCount={event.interestedCount}>
-                    {event.share && <EventShare share={event.share} imagePath={`/shows/${event.id}/opengraph-image`} coverUrl={event.coverUrl} />}
+                    {event.share && <EventShare share={event.share} dateLabel={event.shareDateLabel} venue={event.venue} location={event.location}
+                      imagePath={`/shows/${event.id}/opengraph-image`} coverUrl={event.coverUrl} />}
                   </EventRsvp>
                 </div>
                 <a className={styles.rowArrow} href={event.eventUrl} target="_blank" rel="noopener noreferrer" aria-label={`View ${event.title} on Facebook (opens in a new tab)`}><Icon name="arrowUpRight" size={24} /></a>

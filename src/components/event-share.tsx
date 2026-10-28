@@ -3,9 +3,17 @@
 import { useEffect, useId, useRef, useState } from "react";
 import { ChatCircleText, Copy, InstagramLogo, ShareNetwork, WhatsappLogo, X } from "@phosphor-icons/react";
 import { getShareLinks, type EventShareData } from "@/lib/event-sharing";
+import { EventLocation } from "./event-location";
 import styles from "./event-share.module.css";
 
-export function EventShare({ share, imagePath, coverUrl }: { share: EventShareData; imagePath: string; coverUrl: string | null }) {
+export function EventShare({ share, dateLabel, venue, location, imagePath, coverUrl }: {
+  share: EventShareData;
+  dateLabel?: string;
+  venue?: string | null;
+  location?: string | null;
+  imagePath: string;
+  coverUrl: string | null;
+}) {
   const trigger = useRef<HTMLButtonElement>(null);
   const dialog = useRef<HTMLDialogElement>(null);
   const heading = useRef<HTMLHeadingElement>(null);
@@ -115,7 +123,11 @@ export function EventShare({ share, imagePath, coverUrl }: { share: EventShareDa
         <h2 ref={heading} id={titleId} tabIndex={-1}>Share this show.</h2>
         <div className={styles.preview}>
           {coverUrl && <img src={coverUrl} alt="" width={120} height={63} referrerPolicy="no-referrer" />}
-          <div><p className={styles.eventTitle}>{share.title}</p><p className={styles.eventDate}>{share.text}</p></div>
+          <div>
+            <p className={styles.eventTitle}>{share.title}</p>
+            <p className={styles.eventDate}>{dateLabel || share.text}</p>
+            {dateLabel && (venue || location) && <p className={styles.eventLocation}><EventLocation venue={venue} location={location} /></p>}
+          </div>
         </div>
         <div className={styles.options}>
           <a href={links.whatsapp} target="_blank" rel="noopener noreferrer"><WhatsappLogo size={22} weight="light" aria-hidden="true" /><span>WhatsApp</span></a>
