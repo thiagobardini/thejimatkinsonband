@@ -4,9 +4,8 @@
   position: relative;
   /* Keep the native player above the site's fixed grain overlay (layer 5). */
   z-index: 6;
-  max-width: 1400px;
-  margin-inline: auto;
-  background: var(--stage-ink);
+  width: 100%;
+  background: linear-gradient(180deg, var(--color-ink), var(--stage-ink) 180px);
   isolation: isolate;
   /* Clip escaping smoke without creating a scroll container for the sticky stage. */
   overflow: clip;
@@ -36,6 +35,7 @@
   position: sticky;
   top: max(24px, calc((100svh - var(--video-height)) / 2));
   width: calc(100% - 128px);
+  max-width: 1272px;
   margin-inline: auto;
   display: grid;
   gap: 8px;
