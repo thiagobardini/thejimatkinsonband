@@ -18,28 +18,30 @@ export function HeroNextShow({ event }: { event: Pick<BandEvent, "title" | "star
   const motionRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const moving = motionRef.current;
-    const anchor = moving?.parentElement;
+    const moving = motionRef.current?.parentElement;
     const hero = moving?.closest<HTMLElement>(".hero");
-    if (!moving || !anchor || !hero || typeof ResizeObserver === "undefined" || !moving.animate) return;
+    if (!moving || !hero || typeof ResizeObserver === "undefined" || !moving.animate) return;
 
     const mobile = window.matchMedia("(max-width: 767px)");
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)");
-    let previousTop = anchor.getBoundingClientRect().top + window.scrollY;
+    let previousTop = hero.getBoundingClientRect().bottom - moving.getBoundingClientRect().height + window.scrollY;
     let previousWidth = hero.getBoundingClientRect().width;
     let animation: Animation | undefined;
     const cancel = () => animation?.cancel();
 
     const observer = new ResizeObserver(() => {
-      const bounds = anchor.getBoundingClientRect();
-      const nextTop = bounds.top + window.scrollY;
-      const nextWidth = hero.getBoundingClientRect().width;
+      // The footer includes its divider. Measure its layout slot from the unanimated hero.
+      const heroBounds = hero.getBoundingClientRect();
+      const bounds = moving.getBoundingClientRect();
+      const layoutTop = heroBounds.bottom - bounds.height;
+      const nextTop = layoutTop + window.scrollY;
+      const nextWidth = heroBounds.width;
       const offset = previousTop - nextTop;
       const sameWidth = Math.abs(previousWidth - nextWidth) < .5;
       previousTop = nextTop;
       previousWidth = nextWidth;
 
-      if (!mobile.matches || reduced.matches || !sameWidth || bounds.bottom < 0 || bounds.top > window.innerHeight) {
+      if (!mobile.matches || reduced.matches || !sameWidth || layoutTop + bounds.height < 0 || layoutTop > window.innerHeight) {
         cancel();
         return;
       }
