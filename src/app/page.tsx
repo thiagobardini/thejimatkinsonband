@@ -1,6 +1,7 @@
 import Image from "next/image";
 import { BandLogo } from "@/components/band-logo";
 import { HeroPhoto } from "@/components/hero-photo";
+import { HeroNextShow } from "@/components/hero-next-show";
 import { HeroAtmosphere } from "@/components/hero-atmosphere";
 import { Icon } from "@/components/icon";
 import { MagneticLink } from "@/components/magnetic-link";
@@ -21,6 +22,7 @@ export const revalidate = 900;
 export default async function Home() {
   const feed = await getBandEvents();
   const { upcoming, past } = partitionEvents(feed.events);
+  const nextShow = upcoming[0];
 
   return (
     <>
@@ -53,7 +55,7 @@ export default async function Home() {
             </div>
             <div className="hero-actions intro-reveal flex flex-wrap items-center gap-x-6 gap-y-3">
               <MagneticLink href={band.emailHref} className="hero-booking inline-flex items-center gap-3"><span>Book the band</span><Icon name="arrowUpRight" size={18} /></MagneticLink>
-              <a href="#shows" className="hero-shows inline-flex items-center gap-2">Upcoming shows <Icon name="arrowDown" size={16} /></a>
+              {nextShow ? null : <a href="#shows" className="hero-shows inline-flex items-center gap-2">Upcoming shows <Icon name="arrowDown" size={16} /></a>}
             </div>
             <div className="hero-community">
               <div className="est-seal" aria-label="Making music in Massachusetts since 2017"><span>EST.</span><strong>2017</strong><span><span className="hidden md:inline">MASSACHUSETTS</span><span className="md:hidden">MA</span></span></div>
@@ -70,9 +72,11 @@ export default async function Home() {
             </div>
           </div>
           <div className="photo-note"><span className="photo-note-rule" /><span className="eyebrow">REAL PEOPLE.<br />REAL LIVE MUSIC.</span></div>
-          <div className="hero-bottom flex flex-wrap items-center justify-between gap-4 px-5 md:px-10 lg:px-16">
-            <p className="flex items-center gap-2.5"><Icon name="location" size={16} /> Central & Eastern Massachusetts</p>
-            <a href="#the-band" className="discover-link flex items-center gap-3">GET TO KNOW THE BAND <Icon name="arrowDown" size={16} /></a>
+          <div className={`hero-bottom ${nextShow ? "hero-bottom-with-show" : "flex flex-wrap items-center justify-between gap-4"} px-5 md:px-10 lg:px-16`}>
+            {nextShow ? <HeroNextShow event={{ title: nextShow.title, startsAt: nextShow.startsAt, venue: nextShow.venue, location: nextShow.location }} /> : <>
+              <p className="flex items-center gap-2.5"><Icon name="location" size={16} /> Central & Eastern Massachusetts</p>
+              <a href="#the-band" className="discover-link flex items-center gap-3">GET TO KNOW THE BAND <Icon name="arrowDown" size={16} /></a>
+            </>}
           </div>
         </section>
 

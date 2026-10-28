@@ -36,7 +36,9 @@ Brand images and fonts are local; Facebook event covers load from the URLs suppl
 
 ## Automatic Facebook events
 
-Upcoming shows and a carousel of recent past shows share one poster-led section after About. The desktop/mobile “Live shows” menu links, hero “Upcoming shows” and About “Find our next show” scroll to this section (`#shows`). The existing Blues Deluxe feature remains in History below it. Event posters and “See the event” link directly to their individual Facebook events; social links and the unavailable-feed fallback keep their external destinations. The shows heading has no separate Facebook listing link.
+Upcoming shows and a carousel of recent past shows share one poster-led section after About. The desktop/mobile “Live shows” menu links, the hero’s next-show ticker (or “Upcoming shows” when no show is announced) and About “Find our next show” scroll to this section (`#shows`). The existing Blues Deluxe feature remains in History below it. Event posters and “See the event” link directly to their individual Facebook events; social links and the unavailable-feed fallback keep their external destinations. The shows heading has no separate Facebook listing link.
+
+When a show is upcoming, the hero’s bottom strip becomes a scrolling text announcement with the nearest show’s title, venue (or location), and Eastern date/time from the same feed as the cards. It replaces the generic hero show link, pauses on hover/focus, includes a pause/resume control, and wraps as static text for reduced motion. Without an upcoming show, the original hero links and Massachusetts footer return. There is no second Facebook request or separate schedule to maintain.
 
 The server reads the Page's `/events` endpoint using these variables, privately in the root `.env.local` during development or in the project's Vercel Environment Variables for Production:
 
@@ -54,7 +56,7 @@ Reads are bounded to three pages of 50 records, then deduplicated and sorted. Th
 
 Facebook credentials can expire or be revoked; saving them in Vercel does not extend their lifetime. Validate the Page token's expiration in Meta before relying on unattended updates, and replace the Vercel Secret and redeploy when reauthorizing.
 
-Implementation: `src/lib/facebook-events.ts`, `src/lib/facebook.ts`, `src/components/band-events.tsx`, `src/components/past-events-carousel.tsx` and `src/components/band-events.module.css`.
+Implementation: `src/lib/facebook-events.ts`, `src/lib/facebook.ts`, `src/components/band-events.tsx`, `src/components/hero-next-show.tsx`, `src/components/past-events-carousel.tsx` and `src/components/band-events.module.css`.
 
 ```sh
 npm test
