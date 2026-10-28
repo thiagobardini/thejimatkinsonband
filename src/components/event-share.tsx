@@ -6,10 +6,15 @@ import { getShareLinks, type EventShareData } from "@/lib/event-sharing";
 import styles from "./event-share.module.css";
 
 export function EventShare({ share, imagePath, coverUrl }: { share: EventShareData; imagePath: string; coverUrl: string | null }) {
+  const trigger = useRef<HTMLButtonElement>(null);
   const dialog = useRef<HTMLDialogElement>(null);
+  const heading = useRef<HTMLHeadingElement>(null);
+  const closeButton = useRef<HTMLButtonElement>(null);
   const linkInput = useRef<HTMLInputElement>(null);
+  const keyboardInteraction = useRef(false);
   const titleId = useId();
   const [open, setOpen] = useState(false);
+  const [pointerRestored, setPointerRestored] = useState(false);
   const [nativeShare, setNativeShare] = useState(false);
   const [ios, setIos] = useState(false);
   const [poster, setPoster] = useState<File | null>(null);
@@ -84,16 +89,30 @@ export function EventShare({ share, imagePath, coverUrl }: { share: EventShareDa
   }
 
   return <>
-    <button className={styles.trigger} type="button" aria-label={`Share ${share.title}`} aria-haspopup="dialog" onClick={() => {
-      setMessage(""); setOpen(true); dialog.current?.showModal();
+    <button ref={trigger} className={styles.trigger} type="button" aria-label={`Share ${share.title}`} aria-haspopup="dialog"
+      data-pointer-restored={pointerRestored || undefined}
+      onBlur={() => setPointerRestored(false)} onKeyDown={() => setPointerRestored(false)} onClick={(event) => {
+      keyboardInteraction.current = event.detail === 0;
+      setPointerRestored(false);
+      setMessage(""); setOpen(true);
+      // Safari taps do not always focus buttons; establish the dialog's return target explicitly.
+      event.currentTarget.focus({ preventScroll: true });
+      dialog.current?.showModal();
+      (keyboardInteraction.current ? closeButton.current : heading.current)?.focus({ preventScroll: true });
     }}><ShareNetwork size={16} weight="light" aria-hidden="true" /> Share</button>
     <dialog ref={dialog} className={styles.dialog} aria-labelledby={titleId}
-      onClose={() => { setOpen(false); setMessage(""); }}
+      onPointerDownCapture={() => { keyboardInteraction.current = false; }}
+      onKeyDownCapture={() => { keyboardInteraction.current = true; }}
+      onClose={() => {
+        setOpen(false); setMessage("");
+        setPointerRestored(!keyboardInteraction.current);
+        trigger.current?.focus({ preventScroll: true });
+      }}
       onClick={(event) => { if (event.target === event.currentTarget) close(); }}>
       <div className={styles.panel}>
-        <button className={styles.close} type="button" aria-label="Close sharing" onClick={close} autoFocus><X size={20} weight="light" aria-hidden="true" /></button>
+        <button ref={closeButton} className={styles.close} type="button" aria-label="Close sharing" onClick={close}><X size={20} weight="light" aria-hidden="true" /></button>
         <p className={styles.eyebrow}><span className="accent-dot" aria-hidden="true" /> BRING SOMEONE ALONG</p>
-        <h2 id={titleId}>Share this show.</h2>
+        <h2 ref={heading} id={titleId} tabIndex={-1}>Share this show.</h2>
         <div className={styles.preview}>
           {coverUrl && <img src={coverUrl} alt="" width={120} height={63} referrerPolicy="no-referrer" />}
           <div><p className={styles.eventTitle}>{share.title}</p><p className={styles.eventDate}>{share.text}</p></div>

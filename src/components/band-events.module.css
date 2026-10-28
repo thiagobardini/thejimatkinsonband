@@ -14,13 +14,11 @@
 .dateStamp strong { color: var(--color-paper); font-family: var(--font-display); font-size: 57px; font-weight: 400; line-height: 1.15; }
 .posterLink { display: block; min-width: 0; }
 .eventActions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 24px; margin-top: 8px; }
-.eventActions .eventDetails { margin-top: 0; }
 .upcomingCopy { min-width: 0; }
 .dateLine { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 15px; color: var(--color-accent); font-size: 11px; letter-spacing: .025em; }
 .dateLine > span { color: var(--color-muted); }
 .upcomingCopy h3 { margin-top: 12px; color: var(--color-paper); font-family: var(--font-display); font-size: clamp(28px, 2.7vw, 38px); line-height: 1.25; font-weight: 400; text-wrap: pretty; overflow-wrap: anywhere; transition: color .25s cubic-bezier(.16, 1, .3, 1); }
 .upcomingCopy h3 a:hover { color: var(--color-accent); }
-.eventDetails { display: inline-flex; align-items: center; gap: 8px; min-height: 36px; margin-top: 8px; color: var(--color-paper); font-size: 11px; }
 .rowArrow { color: var(--color-muted); transition: transform .3s cubic-bezier(.16, 1, .3, 1), color .3s cubic-bezier(.16, 1, .3, 1); }
 .rowArrow:hover { transform: translate(3px, -3px); color: var(--color-accent); }
 .artwork { display: block; position: relative; width: 100%; min-width: 0; overflow: hidden; aspect-ratio: 1200 / 630; background: #09171f; }
@@ -80,8 +78,7 @@
   .upcomingCopy { grid-column: 2; grid-row: 2; }
   .dateLine { gap: 4px 10px; font-size: 10px; }
   .upcomingCopy h3 { margin-top: 9px; font-size: 28px; }
-  .eventDetails { min-height: 44px; font-size: 11px; }
-  .eventActions { margin-top: 3px; gap: 4px 22px; }
+  .eventActions { margin-top: 4px; gap: 4px 22px; }
   .venue { margin-top: 9px; font-size: 12px; line-height: 1.6; }
   .timezone { margin-top: 18px; font-size: 9px; }
   .archive { margin-top: 42px; padding-top: 32px; }

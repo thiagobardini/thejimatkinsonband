@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { BandLogo } from "@/components/band-logo";
 import { EventArtwork } from "@/components/event-artwork";
 import { EventShare } from "@/components/event-share";
+import { EventRsvp } from "@/components/event-rsvp";
 import { Icon } from "@/components/icon";
 import { getBandEvent } from "@/lib/facebook";
 import { partitionEvents } from "@/lib/facebook-events";
@@ -38,7 +39,7 @@ export default async function Show({ params }: Props) {
           <p className={styles.date}><time dateTime={event.startsAt}>{eventDateLabel(event)}</time></p>
           {(event.venue || event.location) && <p className={styles.venue}>{[event.venue, event.location].filter(Boolean).join(" · ")}</p>}
           <div className={styles.actions}>
-            <a href={event.eventUrl} target="_blank" rel="noopener noreferrer">The details <Icon name="arrowUpRight" size={16} /><span className="sr-only"> on Facebook (opens in a new tab)</span></a>
+            {upcoming ? <EventRsvp eventUrl={event.eventUrl} title={event.title} /> : <a href={event.eventUrl} target="_blank" rel="noopener noreferrer">The details <Icon name="arrowUpRight" size={16} /><span className="sr-only"> on Facebook (opens in a new tab)</span></a>}
             {upcoming && <EventShare share={getEventShare(event, siteOrigin)} imagePath={`/shows/${event.id}/opengraph-image`} coverUrl={event.coverUrl} />}
           </div>
           <p className={styles.note}>Good music. Good company. Bring someone along.</p>

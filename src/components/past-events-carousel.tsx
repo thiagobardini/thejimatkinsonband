@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 import { EventShare } from "./event-share";
 import type { EventShareData } from "@/lib/event-sharing";
 import { EventArtwork } from "./event-artwork";
+import { EventRsvp } from "./event-rsvp";
 import { Icon } from "./icon";
 import styles from "./band-events.module.css";
 
@@ -97,7 +98,7 @@ export function EventsCarousel({ events, kind, heading }: {
                   <h3><a href={event.eventUrl} target="_blank" rel="noopener noreferrer">{event.title}<span className="sr-only"> on Facebook (opens in a new tab)</span></a></h3>
                   {(event.venue || event.location) && <p className={styles.venue}>{event.venue}{event.venue && event.location && <span> · </span>}{event.location}</p>}
                   <div className={styles.eventActions}>
-                    <a className={styles.eventDetails} href={event.eventUrl} target="_blank" rel="noopener noreferrer">The details <Icon name="arrowUpRight" size={15} /><span className="sr-only"> on Facebook (opens in a new tab)</span></a>
+                    <EventRsvp eventUrl={event.eventUrl} title={event.title} />
                     {event.share && <EventShare share={event.share} imagePath={`/shows/${event.id}/opengraph-image`} coverUrl={event.coverUrl} />}
                   </div>
                 </div>
