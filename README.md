@@ -56,7 +56,9 @@ Reads are bounded to three pages of 50 records, then deduplicated and sorted. Th
 
 Facebook credentials can expire or be revoked; saving them in Vercel does not extend their lifetime. Validate the Page token's expiration in Meta before relying on unattended updates, and replace the Vercel Secret and redeploy when reauthorizing.
 
-Implementation: `src/lib/facebook-events.ts`, `src/lib/facebook.ts`, `src/components/band-events.tsx`, `src/components/hero-next-show.tsx`, `src/components/past-events-carousel.tsx` and `src/components/band-events.module.css`.
+Upcoming cards include a Share button alongside The details. Each shares a public `/shows/[id]` page with its own canonical URL, title, Eastern date/time, venue, and event-specific Open Graph/Twitter image. The image routes refresh the poster from the same Facebook feed and serve a same-origin PNG, with a branded event card if no poster is available. External poster reads are bounded and restricted to Facebook CDN hosts. Sharing offers WhatsApp, SMS/Messages, copying the link, and the device's native share sheet when available. Instagram uses file sharing where supported; visitors can also save the poster and add the copied event URL to their story. Available apps and link previews depend on the receiving platform. Past cards keep their existing Facebook links; shared event pages remain readable while the event remains in the feed. No production database or additional event schedule is introduced.
+
+Implementation: `src/lib/event-sharing.ts`, `src/components/event-share.tsx`, `src/app/shows/[id]/`, `src/lib/facebook-events.ts`, `src/lib/facebook.ts`, `src/components/band-events.tsx`, `src/components/hero-next-show.tsx`, `src/components/past-events-carousel.tsx` and `src/components/band-events.module.css`.
 
 ```sh
 npm test

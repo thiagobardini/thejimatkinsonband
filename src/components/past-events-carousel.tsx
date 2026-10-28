@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
+import { EventShare } from "./event-share";
+import type { EventShareData } from "@/lib/event-sharing";
 import { EventArtwork } from "./event-artwork";
 import { Icon } from "./icon";
 import styles from "./band-events.module.css";
@@ -17,6 +19,7 @@ export type CarouselShow = {
   timeLabel?: string;
   coverUrl: string | null;
   eventUrl: string;
+  share?: EventShareData;
 };
 
 export type PastShow = CarouselShow;
@@ -85,32 +88,33 @@ export function EventsCarousel({ events, kind, heading }: {
         }}>
         {events.map((event) => (
           <li key={event.id} className={upcoming ? styles.upcomingPoster : styles.pastShow}>
-            <a href={event.eventUrl} target="_blank" rel="noopener noreferrer">
-              {upcoming ? (
-                <>
-                  <span className={styles.dateStamp} aria-hidden="true"><span>{event.dateMonth}</span><strong>{event.dateDay}</strong></span>
-                  <EventArtwork src={event.coverUrl} />
-                  <div className={styles.upcomingCopy}>
-                    <p className={styles.dateLine}><time dateTime={event.startsAt}>{event.dateLabel}</time>{event.timeLabel && <span>{event.timeLabel}</span>}</p>
-                    <h3>{event.title}</h3>
-                    {(event.venue || event.location) && <p className={styles.venue}>{event.venue}{event.venue && event.location && <span> · </span>}{event.location}</p>}
-                    <span className={styles.eventDetails}>The details <Icon name="arrowUpRight" size={15} /></span>
+            {upcoming ? (
+              <div className={styles.upcomingLayout}>
+                <span className={styles.dateStamp} aria-hidden="true"><span>{event.dateMonth}</span><strong>{event.dateDay}</strong></span>
+                <a className={styles.posterLink} href={event.eventUrl} target="_blank" rel="noopener noreferrer" aria-label={`Poster and details for ${event.title} on Facebook (opens in a new tab)`}><EventArtwork src={event.coverUrl} /></a>
+                <div className={styles.upcomingCopy}>
+                  <p className={styles.dateLine}><time dateTime={event.startsAt}>{event.dateLabel}</time>{event.timeLabel && <span>{event.timeLabel}</span>}</p>
+                  <h3><a href={event.eventUrl} target="_blank" rel="noopener noreferrer">{event.title}<span className="sr-only"> on Facebook (opens in a new tab)</span></a></h3>
+                  {(event.venue || event.location) && <p className={styles.venue}>{event.venue}{event.venue && event.location && <span> · </span>}{event.location}</p>}
+                  <div className={styles.eventActions}>
+                    <a className={styles.eventDetails} href={event.eventUrl} target="_blank" rel="noopener noreferrer">The details <Icon name="arrowUpRight" size={15} /><span className="sr-only"> on Facebook (opens in a new tab)</span></a>
+                    {event.share && <EventShare share={event.share} imagePath={`/shows/${event.id}/opengraph-image`} coverUrl={event.coverUrl} />}
                   </div>
-                  <span className={styles.rowArrow}><Icon name="arrowUpRight" size={24} /></span>
-                </>
-              ) : (
-                <>
-                  <EventArtwork src={event.coverUrl} />
-                  <div className={styles.pastMeta}>
-                    <time dateTime={event.startsAt}>{event.dateLabel}</time>
-                    <Icon name="arrowUpRight" size={17} />
-                  </div>
-                  <h4>{event.title}</h4>
-                  {(event.venue || event.location) && <p>{event.venue}{event.venue && event.location && " · "}{event.location}</p>}
-                </>
-              )}
-              <span className="sr-only">View event on Facebook (opens in a new tab).</span>
-            </a>
+                </div>
+                <a className={styles.rowArrow} href={event.eventUrl} target="_blank" rel="noopener noreferrer" aria-label={`View ${event.title} on Facebook (opens in a new tab)`}><Icon name="arrowUpRight" size={24} /></a>
+              </div>
+            ) : (
+              <a href={event.eventUrl} target="_blank" rel="noopener noreferrer">
+                <EventArtwork src={event.coverUrl} />
+                <div className={styles.pastMeta}>
+                  <time dateTime={event.startsAt}>{event.dateLabel}</time>
+                  <Icon name="arrowUpRight" size={17} />
+                </div>
+                <h4>{event.title}</h4>
+                {(event.venue || event.location) && <p>{event.venue}{event.venue && event.location && " · "}{event.location}</p>}
+                <span className="sr-only">View event on Facebook (opens in a new tab).</span>
+              </a>
+            )}
           </li>
         ))}
       </ul>

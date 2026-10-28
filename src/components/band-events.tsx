@@ -1,4 +1,6 @@
 import type { BandEvent } from "@/lib/facebook-events";
+import { getEventShare } from "@/lib/event-sharing";
+import { siteOrigin } from "@/lib/site";
 import { band, bluesDeluxeSession } from "@/lib/band";
 import { Icon } from "./icon";
 import { EventsCarousel, PastEventsCarousel } from "./past-events-carousel";
@@ -37,7 +39,7 @@ export function BandEvents({ events, pastEvents, status }: {
       {upcoming.length > 0 ? (
         <>
           <EventsCarousel kind="upcoming" events={upcoming.map((event) => ({
-            id: event.id, title: event.title, startsAt: event.startsAt,
+            id: event.id, title: event.title, startsAt: event.startsAt, share: getEventShare(event, siteOrigin),
             dateLabel: shortDate.format(new Date(event.startsAt)), timeLabel: showTime(event),
             dateMonth: month.format(new Date(event.startsAt)), dateDay: day.format(new Date(event.startsAt)),
             venue: event.venue, location: event.location, coverUrl: event.coverUrl, eventUrl: event.eventUrl,

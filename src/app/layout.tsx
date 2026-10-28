@@ -6,9 +6,7 @@ import "@fontsource/outfit/600.css";
 import "@fontsource/oswald/500.css";
 import "@fontsource/oswald/600.css";
 import "./globals.css";
-
-const siteOrigin = process.env.SITE_URL
-  || (process.env.VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` : "http://localhost:3000");
+import { siteOrigin } from "@/lib/site";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteOrigin),
