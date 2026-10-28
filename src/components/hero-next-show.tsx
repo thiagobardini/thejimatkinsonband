@@ -3,7 +3,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Pause, Play } from "@phosphor-icons/react";
 import type { BandEvent } from "@/lib/facebook-events";
-import { Icon } from "./icon";
 import styles from "./hero-next-show.module.css";
 
 const date = new Intl.DateTimeFormat("en-US", {
@@ -94,7 +93,6 @@ export function HeroNextShow({ event }: { event: Pick<BandEvent, "title" | "star
               ))}
             </span>
           </span>
-          <span className={styles.direction}><Icon name="arrowDown" size={19} /></span>
         </a>
         <button type="button" className={styles.pause} onClick={() => setPaused((value) => !value)}
           aria-label={paused ? "Resume next show ticker" : "Pause next show ticker"} aria-pressed={paused}>
