@@ -14,7 +14,7 @@
   gap: 28px;
   flex: 1;
   min-width: 0;
-  min-height: 77px;
+  min-height: var(--hero-footer-height, 66px);
 }
 
 .schedule { display: grid; gap: 5px; }
@@ -24,10 +24,10 @@
 .viewport { min-width: 0; overflow: hidden; mask-image: linear-gradient(90deg, transparent, #000 16px, #000 calc(100% - 24px), transparent); }
 .track { display: flex; width: max-content; min-width: 200%; animation: marquee 36s cubic-bezier(.2, .22, .8, .78) infinite; }
 .copy { display: flex; align-items: center; gap: 24px; flex: 1 0 auto; padding-right: 24px; white-space: nowrap; }
-.title, .place { font-family: var(--font-display); font-size: 24px; font-weight: 400; line-height: 1.3; letter-spacing: .015em; }
+.title, .place { font-family: var(--font-display); font-size: 20px; font-weight: 400; line-height: 1.3; letter-spacing: .015em; }
 .title { color: var(--color-paper); }
 .place { color: var(--color-muted); }
-.divider { color: #c8ab7999; font-size: 20px; font-weight: 300; }
+.divider { color: #c8ab7999; font-size: 17px; font-weight: 300; }
 .endMark { flex-shrink: 0; width: 5px; height: 5px; background: var(--color-accent); }
 .direction { display: grid; place-items: center; width: 36px; height: 36px; border-radius: 50%; background: #c8ab7910; color: var(--color-accent); transition: background .35s cubic-bezier(.16, 1, .3, 1), transform .35s cubic-bezier(.16, 1, .3, 1); }
 .link:hover .direction { transform: translateY(2px); background: #c8ab7924; }
@@ -40,15 +40,15 @@
 
 @media (max-width: 767px) {
   .show { gap: 4px; }
-  .link { grid-template-columns: minmax(0, 1fr) 32px; column-gap: 12px; row-gap: 10px; padding-block: 16px; }
+  .link { grid-template-columns: minmax(0, 1fr) 32px; column-gap: 12px; row-gap: 6px; padding-block: 10px; }
   .schedule { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: center; column-gap: 14px; row-gap: 5px; }
   .label { font-size: 8px; letter-spacing: .12em; gap: 7px; }
   .schedule time { font-size: 10px; }
   .dateDivider { margin-inline: 2px; }
-  .title, .place { font-size: 22px; }
+  .title, .place { font-size: 18px; }
   .copy { gap: 18px; padding-right: 18px; }
   .direction { width: 32px; height: 32px; }
-  .pause { align-self: flex-end; margin-bottom: 10px; }
+  .pause { align-self: flex-end; margin-bottom: 4px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
