@@ -5,13 +5,14 @@ import { SpeakerHigh, SpeakerSlash } from "@phosphor-icons/react";
 import { motion, useInView, useReducedMotion, useScroll, useTransform } from "framer-motion";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Icon } from "@/components/icon";
+import { VideoSmoke } from "@/components/video-smoke";
 import { loadYouTubeApi, type YouTubePlayer } from "@/lib/youtube-player";
 import styles from "./live-performance.module.css";
 
 const videoId = "kC2sZCyF41k";
 const videoTitle = "I Put a Spell on You — The Jim Atkinson Band live";
 const videoHref = `https://www.youtube.com/watch?v=${videoId}`;
-type Playback = "loading" | "playing" | "paused" | "blocked" | "error";
+type Playback = "loading" | "playing" | "buffering" | "paused" | "blocked" | "error";
 
 export function LivePerformance() {
   const section = useRef<HTMLElement>(null);
@@ -53,6 +54,7 @@ export function LivePerformance() {
     player.current.pauseVideo();
     player.current.mute();
     setMuted(true);
+    setPlayback("paused");
   }, []);
 
   const toggleSound = () => {
@@ -169,6 +171,10 @@ export function LivePerformance() {
               event.target.mute();
               setMuted(true);
               setPlayback("paused");
+            } else if (event.data === 3) {
+              setPlayback("buffering");
+            } else if (event.data === -1 || event.data === 5) {
+              setPlayback(event.data === -1 ? "loading" : "paused");
             }
           },
           onAutoplayBlocked: () => {
@@ -215,9 +221,12 @@ export function LivePerformance() {
       </div>
       <div ref={track} className={styles.track}>
       <div className={styles.stage}>
-        <motion.div ref={frame} className={styles.screen} style={reduced ? { scale: 1, rotateX: 0, y: 0 } : compact ? { scale: mobileScale, rotateX: 0, y: 0 } : { scale, rotateX, y: rise }} data-playback={playback}>
-          <Image src={`https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`} alt="The Jim Atkinson Band performing live on a brick-walled stage under warm lights" fill unoptimized sizes="100vw" className={styles.poster} />
-          <div ref={mount} className={styles.player} hidden={playback === "error"} />
+        <motion.div ref={frame} className={styles.screenShell} style={reduced ? { scale: 1, rotateX: 0, y: 0 } : compact ? { scale: mobileScale, rotateX: 0, y: 0 } : { scale, rotateX, y: rise }} data-playback={playback}>
+          <VideoSmoke active={ready && playback === "playing" && inView && pageVisible && !reduced} />
+          <div className={styles.screen}>
+            <Image src={`https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`} alt="The Jim Atkinson Band performing live on a brick-walled stage under warm lights" fill unoptimized sizes="100vw" className={styles.poster} />
+            <div ref={mount} className={styles.player} hidden={playback === "error"} />
+          </div>
         </motion.div>
         {playback !== "error" && (
           <div className={styles.soundBar}>

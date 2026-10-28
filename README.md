@@ -34,6 +34,8 @@ Deploy to a Next.js-compatible host. The homepage remains available without Face
 
 Brand images and fonts are local; Facebook event covers load from the URLs supplied by the authorized Page. Includes reduced motion support, visible keyboard focus, a skip link, an accessible mobile menu and a keyboard/touch-friendly show carousel.
 
+The live video has a separate stage-smoke effect behind its frame. It follows the actual YouTube playback state, including muted playback, and fades away when paused, buffering, finished, unavailable, offscreen or in a hidden tab. It is an atmospheric animation rather than an audio visualizer. Rendering is capped for mobile and disabled for reduced motion; smoke does not cover the video, controls or surrounding text.
+
 ## Automatic Facebook events
 
 Upcoming shows and a carousel of recent past shows share one poster-led section after About. The desktop/mobile “Live shows” menu links, the hero’s next-show ticker (or “Upcoming shows” when no show is announced) and About “Find our next show” scroll to this section (`#shows`). The existing Blues Deluxe feature remains in History below it. Event posters and “See the event” link directly to their individual Facebook events; social links and the unavailable-feed fallback keep their external destinations. The shows heading has no separate Facebook listing link.
