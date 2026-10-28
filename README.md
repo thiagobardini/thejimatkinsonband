@@ -34,7 +34,7 @@ Deploy to a Next.js-compatible host. The homepage remains available without Face
 
 Brand images and fonts are local; Facebook event covers load from the URLs supplied by the authorized Page. Includes reduced motion support, visible keyboard focus, a skip link, an accessible mobile menu and a keyboard/touch-friendly show carousel.
 
-The live video has a separate stage-smoke effect behind its frame. It follows the actual YouTube playback state, including muted playback, and fades away when paused, buffering, finished, unavailable, offscreen or in a hidden tab. It is an atmospheric animation rather than an audio visualizer. Rendering is capped for mobile and disabled for reduced motion; smoke does not cover the video, controls or surrounding text.
+The live video has a separate stage-smoke effect behind its frame. It follows the actual YouTube playback state, including muted playback, and fades away when paused, buffering, finished, unavailable, offscreen or in a hidden tab. It is an atmospheric animation rather than an audio visualizer. Rendering is capped for mobile and disabled for reduced motion. Smoke fades to the section’s dark color near the frame, while a shallow, pointer-inert vignette softens the image perimeter; the center stays sharp and the smaller bottom fade preserves captions. Smoke does not cover the video, controls or surrounding text.
 
 ## Automatic Facebook events
 

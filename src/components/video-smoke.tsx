@@ -53,8 +53,8 @@ const fragmentSource = `
     float distanceFromFrame = length(max(edge, 0.0))
       + min(max(edge.x, edge.y), 0.0);
 
-    // No field needs to be rendered underneath the middle of the video.
-    if (distanceFromFrame < -0.035) {
+    // Keep the video perimeter in darkness before smoke blooms outward.
+    if (distanceFromFrame <= 0.0) {
       gl_FragColor = vec4(0.0);
       return;
     }
@@ -77,11 +77,12 @@ const fragmentSource = `
     float outward = max(distanceFromFrame, 0.0);
     float envelope = exp(-outward * 3.9)
       * (1.0 - smoothstep(0.18, 0.66, outward));
+    float darkCollar = smoothstep(0.0, 0.14, outward);
     float rising = mix(0.52, 1.0, smoothstep(-0.65, 0.65, p.y));
 
     vec2 feather = smoothstep(vec2(0.0), vec2(0.12), v_uv)
       * smoothstep(vec2(0.0), vec2(0.12), 1.0 - v_uv);
-    float alpha = density * envelope * rising * feather.x * feather.y * 0.56;
+    float alpha = density * envelope * darkCollar * rising * feather.x * feather.y * 0.56;
 
     float warmth = clamp((0.5 - v_uv.x) * 0.55 + curl.y * 0.22, 0.0, 0.32);
     vec3 stageLight = mix(vec3(0.42, 0.58, 0.63), vec3(0.69, 0.43, 0.29), warmth);
