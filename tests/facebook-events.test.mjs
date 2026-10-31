@@ -165,6 +165,21 @@ test("follows only returned cursors on the trusted Graph endpoint with cached he
   assert.equal(JSON.stringify(result).includes(token), false);
 });
 
+test("fresh attendance reads bypass the data cache without conflicting revalidation options", async () => {
+  const { readFacebookEvents } = await api();
+  const calls = [];
+  const result = await readFacebookEvents({ token, fresh: true, fetcher: fakeFetch([
+    { data: [{ ...rawEvent, interested_count: 7 }] },
+  ], calls) });
+  assert.equal(result.status, "connected");
+  assert.equal(result.events[0].interestedCount, 7);
+  assert.equal(calls.length, 1);
+  assert.equal(calls[0].init.cache, "no-store");
+  assert.equal(calls[0].init.next, undefined);
+  assert.equal(calls[0].init.headers.Authorization, `Bearer ${token}`);
+  assert.equal(calls[0].url.searchParams.has("access_token"), false);
+});
+
 test("bounds reads at three pages without pretending to retrieve a full archive", async () => {
   const { readFacebookEvents } = await api();
   const calls = [];

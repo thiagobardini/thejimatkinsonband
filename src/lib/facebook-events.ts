@@ -118,13 +118,14 @@ export function partitionEvents(events: readonly BandEvent[], now = Date.now()):
   return { upcoming: upcoming.sort(ascending), past: past.sort((left, right) => ascending(right, left)) };
 }
 
-type FacebookRequestInit = RequestInit & { next: { revalidate: number } };
+type FacebookRequestInit = RequestInit & { next?: { revalidate: number } };
 type FacebookFetcher = (url: string, init: FacebookRequestInit) => Promise<Pick<Response, "ok" | "json">>;
 type FacebookReadOptions = {
   token?: string;
   pageId?: string;
   graphVersion?: string;
   fetcher?: FacebookFetcher;
+  fresh?: boolean;
 };
 
 function unsupportedOptionalField(value: unknown, fields: ReadonlySet<string>): string | null {
@@ -138,7 +139,7 @@ function unsupportedOptionalField(value: unknown, fields: ReadonlySet<string>): 
   return null;
 }
 
-export async function readFacebookEvents({ token: suppliedToken, pageId = DEFAULT_FACEBOOK_PAGE_ID, graphVersion = "v26.0", fetcher = fetch }: FacebookReadOptions = {}): Promise<BandEventsResult> {
+export async function readFacebookEvents({ token: suppliedToken, pageId = DEFAULT_FACEBOOK_PAGE_ID, graphVersion = "v26.0", fetcher = fetch, fresh = false }: FacebookReadOptions = {}): Promise<BandEventsResult> {
   const token = suppliedToken?.trim();
   if (!token) return { status: "unconfigured", events: [] };
   if (!/^\d{1,32}$/.test(pageId) || !/^v\d+\.\d+$/.test(graphVersion)) return { status: "unavailable", events: [] };
@@ -158,8 +159,7 @@ export async function readFacebookEvents({ token: suppliedToken, pageId = DEFAUL
       method: "GET",
       headers: { Authorization: `Bearer ${token}`, Accept: "application/json" },
       redirect: "error",
-      cache: "force-cache",
-      next: { revalidate: 900 },
+      ...(fresh ? { cache: "no-store" as const } : { cache: "force-cache" as const, next: { revalidate: 900 } }),
       signal: AbortSignal.timeout(15_000),
     });
     // The fetch signal remains active while the body is consumed.

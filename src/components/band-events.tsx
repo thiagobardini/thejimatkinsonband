@@ -4,6 +4,7 @@ import { siteOrigin } from "@/lib/site";
 import { band, bluesDeluxeSession } from "@/lib/band";
 import { Icon } from "./icon";
 import { EventsCarousel, PastEventsCarousel } from "./past-events-carousel";
+import { EventAttendanceProvider } from "./event-attendance-provider";
 import styles from "./band-events.module.css";
 
 const eastern = "America/New_York";
@@ -38,14 +39,16 @@ export function BandEvents({ events, pastEvents, status }: {
       </div>
       {upcoming.length > 0 ? (
         <>
-          <EventsCarousel kind="upcoming" events={upcoming.map((event) => ({
-            id: event.id, title: event.title, startsAt: event.startsAt, share: getEventShare(event, siteOrigin),
-            shareDateLabel: eventDateLabel(event),
-            dateLabel: shortDate.format(new Date(event.startsAt)), timeLabel: showTime(event),
-            dateMonth: month.format(new Date(event.startsAt)), dateDay: day.format(new Date(event.startsAt)),
-            venue: event.venue, location: event.location, coverUrl: event.coverUrl, eventUrl: event.eventUrl,
-            attendingCount: event.attendingCount, interestedCount: event.interestedCount,
-          }))} />
+          <EventAttendanceProvider>
+            <EventsCarousel kind="upcoming" events={upcoming.map((event) => ({
+              id: event.id, title: event.title, startsAt: event.startsAt, share: getEventShare(event, siteOrigin),
+              shareDateLabel: eventDateLabel(event),
+              dateLabel: shortDate.format(new Date(event.startsAt)), timeLabel: showTime(event),
+              dateMonth: month.format(new Date(event.startsAt)), dateDay: day.format(new Date(event.startsAt)),
+              venue: event.venue, location: event.location, coverUrl: event.coverUrl, eventUrl: event.eventUrl,
+              attendingCount: event.attendingCount, interestedCount: event.interestedCount,
+            }))} />
+          </EventAttendanceProvider>
           <p className={styles.timezone}>Showtimes in Eastern Time.</p>
         </>
       ) : (

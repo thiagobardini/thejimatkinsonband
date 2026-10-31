@@ -101,7 +101,7 @@ export function EventsCarousel({ events, kind, heading }: {
                   <p className={styles.dateLine}><time dateTime={event.startsAt}>{event.dateLabel}</time>{event.timeLabel && <span>{event.timeLabel}</span>}</p>
                   <h3><a href={event.eventUrl} target="_blank" rel="noopener noreferrer">{event.title}<span className="sr-only"> on Facebook (opens in a new tab)</span></a></h3>
                   {(event.venue || event.location) && <p className={styles.venue}><EventLocation venue={event.venue} location={event.location} /></p>}
-                  <EventRsvp eventUrl={event.eventUrl} title={event.title}
+                  <EventRsvp eventId={event.id} eventUrl={event.eventUrl} title={event.title}
                     attendingCount={event.attendingCount} interestedCount={event.interestedCount}>
                     {event.share && <EventShare share={event.share} dateLabel={event.shareDateLabel} venue={event.venue} location={event.location}
                       imagePath={`/shows/${event.id}/opengraph-image`} coverUrl={event.coverUrl} />}

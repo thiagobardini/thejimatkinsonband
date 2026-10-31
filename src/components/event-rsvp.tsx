@@ -1,18 +1,23 @@
+"use client";
+
 import type { ReactNode } from "react";
+import { useEventAttendance } from "./event-attendance-provider";
 import styles from "./event-rsvp.module.css";
 
 const number = new Intl.NumberFormat("en-US");
 
-export function EventRsvp({ eventUrl, title, attendingCount, interestedCount, children }: {
+export function EventRsvp({ eventId, eventUrl, title, attendingCount, interestedCount, children }: {
+  eventId: string;
   eventUrl: string;
   title: string;
   attendingCount?: number | null;
   interestedCount?: number | null;
   children?: ReactNode;
 }) {
+  const current = useEventAttendance(eventId);
   const responses = [
-    { count: attendingCount, label: "going" },
-    { count: interestedCount, label: "interested" },
+    { count: current ? current.attendingCount : attendingCount, label: "going" },
+    { count: current ? current.interestedCount : interestedCount, label: "interested" },
   ].flatMap(({ count, label }) => count == null ? [] : [{ count, label }]);
 
   return <div className={styles.block}>

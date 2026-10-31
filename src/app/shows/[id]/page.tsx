@@ -3,6 +3,7 @@ import { BandLogo } from "@/components/band-logo";
 import { EventArtwork } from "@/components/event-artwork";
 import { EventShare } from "@/components/event-share";
 import { EventRsvp } from "@/components/event-rsvp";
+import { EventAttendanceProvider } from "@/components/event-attendance-provider";
 import { EventLocation } from "@/components/event-location";
 import { Icon } from "@/components/icon";
 import { getBandEvent } from "@/lib/facebook";
@@ -39,11 +40,13 @@ export default async function Show({ params }: Props) {
           <h1 className="font-display">{event.title}</h1>
           <p className={styles.date}><time dateTime={event.startsAt}>{eventDateLabel(event)}</time></p>
           {(event.venue || event.location) && <p className={styles.venue}><EventLocation venue={event.venue} location={event.location} /></p>}
-          {upcoming ? <EventRsvp eventUrl={event.eventUrl} title={event.title}
-            attendingCount={event.attendingCount} interestedCount={event.interestedCount}>
-            <EventShare share={getEventShare(event, siteOrigin)} dateLabel={eventDateLabel(event)} venue={event.venue} location={event.location}
-              imagePath={`/shows/${event.id}/opengraph-image`} coverUrl={event.coverUrl} />
-          </EventRsvp> : <div className={styles.actions}>
+          {upcoming ? <EventAttendanceProvider>
+            <EventRsvp eventId={event.id} eventUrl={event.eventUrl} title={event.title}
+              attendingCount={event.attendingCount} interestedCount={event.interestedCount}>
+              <EventShare share={getEventShare(event, siteOrigin)} dateLabel={eventDateLabel(event)} venue={event.venue} location={event.location}
+                imagePath={`/shows/${event.id}/opengraph-image`} coverUrl={event.coverUrl} />
+            </EventRsvp>
+          </EventAttendanceProvider> : <div className={styles.actions}>
             <a href={event.eventUrl} target="_blank" rel="noopener noreferrer">The details <Icon name="arrowUpRight" size={16} /><span className="sr-only"> on Facebook (opens in a new tab)</span></a>
           </div>}
           <p className={styles.note}>Good music. Good company. Bring someone along.</p>

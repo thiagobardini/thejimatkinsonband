@@ -1,14 +1,22 @@
 import "server-only";
 import { cache } from "react";
-import { readFacebookEvents, type BandEventsResult } from "./facebook-events";
+import { partitionEvents, readFacebookEvents, type BandEventsResult } from "./facebook-events";
+import { createAttendanceReader } from "./event-attendance";
 
-export async function getBandEvents(): Promise<BandEventsResult> {
+export async function getBandEvents({ fresh = false }: { fresh?: boolean } = {}): Promise<BandEventsResult> {
   return readFacebookEvents({
     token: process.env.FACEBOOK_PAGE_ACCESS_TOKEN,
     pageId: process.env.FACEBOOK_PAGE_ID?.trim() || undefined,
     graphVersion: process.env.FACEBOOK_GRAPH_VERSION?.trim() || undefined,
+    fresh,
   });
 }
+
+// This fixed server-side source accepts no public event or Page IDs.
+export const getBandAttendance = createAttendanceReader(async () => {
+  const feed = await getBandEvents({ fresh: true });
+  return { ...feed, events: partitionEvents(feed.events).upcoming };
+});
 
 // Shared by the event page, its metadata, and the poster routes. Invalid IDs never reach Graph.
 export const getBandEvent = cache(async (id: string) => {
