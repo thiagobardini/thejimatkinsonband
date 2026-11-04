@@ -3,6 +3,7 @@ import type { BandPost, BandPostsPage } from "./facebook-posts";
 export type NewsSnapshot = {
   posts: BandPost[];
   nextCursor: string | null;
+  hasMore: boolean;
   loading: boolean;
   error: boolean;
 };
@@ -11,21 +12,34 @@ type NewsPagerOptions = {
   initial: BandPostsPage;
   fetchPage: (cursor: string, signal: AbortSignal) => Promise<BandPostsPage>;
   onChange: (snapshot: NewsSnapshot) => void;
+  batchSize?: number;
 };
 
-// The server supplies the first page. This controller requests another page only
-// when the rail's observer or its accessible fallback asks for one.
-export function createNewsPager({ initial, fetchPage, onChange }: NewsPagerOptions): {
-  loadMore: () => Promise<void>;
-  cancel: () => void;
-} {
-  let snapshot: NewsSnapshot = {
-    posts: [...initial.posts],
+function visibleBatchSize(size: number): number {
+  return Number.isSafeInteger(size) && size > 0 ? size : 3;
+}
+
+export function getInitialNewsSnapshot(initial: BandPostsPage, batchSize = 3): NewsSnapshot {
+  const size = visibleBatchSize(batchSize);
+  return {
+    posts: initial.posts.slice(0, size),
     nextCursor: initial.nextCursor,
+    hasMore: initial.posts.length > size || initial.nextCursor !== null,
     loading: false,
     error: initial.status !== "connected",
   };
-  const seenIds = new Set(snapshot.posts.map(({ id }) => id));
+}
+
+// Keep the server's first page and subsequent Graph pages buffered, revealing a
+// small batch only when the reader deliberately asks for more news.
+export function createNewsPager({ initial, fetchPage, onChange, batchSize = 3 }: NewsPagerOptions): {
+  loadMore: () => Promise<void>;
+  cancel: () => void;
+} {
+  const size = visibleBatchSize(batchSize);
+  let snapshot = getInitialNewsSnapshot(initial, size);
+  const buffered = initial.posts.slice(size);
+  const seenIds = new Set(initial.posts.map(({ id }) => id));
   const consumedCursors = new Set<string>();
   let disposed = false;
   let request: AbortController | null = null;
@@ -33,9 +47,26 @@ export function createNewsPager({ initial, fetchPage, onChange }: NewsPagerOptio
 
   function loadMore(): Promise<void> {
     if (inFlight) return inFlight;
-    if (disposed || !snapshot.nextCursor) return Promise.resolve();
+    if (disposed || !snapshot.hasMore) return Promise.resolve();
+
+    if (buffered.length) {
+      inFlight = Promise.resolve().then(() => {
+        if (disposed) return;
+        const added = buffered.splice(0, size);
+        snapshot = {
+          ...snapshot,
+          posts: [...snapshot.posts, ...added],
+          hasMore: buffered.length > 0 || snapshot.nextCursor !== null,
+          loading: false,
+          error: false,
+        };
+        onChange(snapshot);
+      }).finally(() => { inFlight = null; });
+      return inFlight;
+    }
 
     const cursor = snapshot.nextCursor;
+    if (!cursor) return Promise.resolve();
     const controller = new AbortController();
     request = controller;
     snapshot = { ...snapshot, loading: true, error: false };
@@ -57,9 +88,11 @@ export function createNewsPager({ initial, fetchPage, onChange }: NewsPagerOptio
         consumedCursors.add(cursor);
         const nextCursor = page.nextCursor && !consumedCursors.has(page.nextCursor)
           ? page.nextCursor : null;
+        buffered.push(...added);
         snapshot = {
-          posts: [...snapshot.posts, ...added],
+          posts: [...snapshot.posts, ...buffered.splice(0, size)],
           nextCursor,
+          hasMore: buffered.length > 0 || nextCursor !== null,
           loading: false,
           error: false,
         };

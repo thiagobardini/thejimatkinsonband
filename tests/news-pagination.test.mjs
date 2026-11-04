@@ -15,13 +15,88 @@ const deferred = () => {
   return { promise, resolve, reject };
 };
 
-async function setup(initial, fetchPage) {
+async function setup(initial, fetchPage, options = {}) {
   assert.ok(existsSync(moduleUrl), "News pagination is not implemented yet");
   const { createNewsPager } = await import(moduleUrl.href);
   const snapshots = [];
-  const pager = createNewsPager({ initial, fetchPage, onChange: (state) => snapshots.push(state) });
+  const pager = createNewsPager({ initial, fetchPage, onChange: (state) => snapshots.push(state), ...options });
   return { ...pager, snapshots, get last() { return snapshots.at(-1); } };
 }
+
+test("initial news shows three posts while retaining whether buffered posts or a cursor remain", async () => {
+  const { getInitialNewsSnapshot } = await import(moduleUrl.href);
+  const initial = page([post("1"), post("2"), post("3"), post("4")]);
+  const original = structuredClone(initial);
+  assert.deepEqual(getInitialNewsSnapshot(initial), {
+    posts: [post("1"), post("2"), post("3")], nextCursor: null,
+    hasMore: true, loading: false, error: false,
+  });
+  assert.deepEqual(initial, original);
+  assert.equal(getInitialNewsSnapshot(page([post("1")])).hasMore, false);
+  assert.equal(getInitialNewsSnapshot(page([], "older-A")).hasMore, true);
+});
+
+test("buffered initial posts appear three at a time before another Graph page is requested", async () => {
+  const cursors = [];
+  const env = await setup(page(Array.from({ length: 8 }, (_, i) => post(String(i + 1))), "older-A"), async (cursor) => {
+    cursors.push(cursor);
+    return page([post("9")]);
+  });
+  await env.loadMore();
+  assert.deepEqual(env.last.posts.map(({ id }) => id), ["1", "2", "3", "4", "5", "6"]);
+  assert.equal(env.last.hasMore, true);
+  assert.deepEqual(cursors, []);
+  await env.loadMore();
+  assert.deepEqual(env.last.posts.map(({ id }) => id), ["1", "2", "3", "4", "5", "6", "7", "8"]);
+  assert.deepEqual(cursors, []);
+  await env.loadMore();
+  assert.deepEqual(cursors, ["older-A"]);
+  assert.equal(env.last.hasMore, false);
+});
+
+test("a six-post Graph batch reveals only three and keeps its remaining posts after the last cursor", async () => {
+  let requests = 0;
+  const env = await setup(page([post("1")], "older-A"), async () => {
+    requests++;
+    return page([post("1", "Changed upstream"), post("2"), post("3"), post("4"), post("5"), post("6")]);
+  });
+  await env.loadMore();
+  assert.deepEqual(env.last.posts.map(({ id }) => id), ["1", "2", "3", "4"]);
+  assert.equal(env.last.nextCursor, null);
+  assert.equal(env.last.hasMore, true, "The final cursor must not discard buffered posts");
+  assert.equal(env.last.posts[0].message, "News 1");
+  await env.loadMore();
+  assert.deepEqual(env.last.posts.map(({ id }) => id), ["1", "2", "3", "4", "5", "6"]);
+  assert.equal(env.last.hasMore, false);
+  assert.equal(requests, 1);
+});
+
+test("the final initial buffer can be revealed without a cursor or network request", async () => {
+  const env = await setup(page([post("1"), post("2"), post("3"), post("4")]), async () => {
+    assert.fail("An initial buffer must not require another Graph request");
+  });
+  await env.loadMore();
+  assert.deepEqual(env.last, {
+    posts: [post("1"), post("2"), post("3"), post("4")], nextCursor: null,
+    hasMore: false, loading: false, error: false,
+  });
+});
+
+test("buffer reveals honor a custom batch size and coalesce concurrent clicks", async () => {
+  const { getInitialNewsSnapshot } = await import(moduleUrl.href);
+  const initial = page([post("1"), post("2"), post("3"), post("4"), post("5")]);
+  assert.deepEqual(getInitialNewsSnapshot(initial, 2).posts.map(({ id }) => id), ["1", "2"]);
+  const env = await setup(initial, async () => assert.fail("Buffer must be used first"), { batchSize: 2 });
+  const first = env.loadMore();
+  const concurrent = env.loadMore();
+  assert.equal(first, concurrent);
+  await first;
+  assert.deepEqual(env.last.posts.map(({ id }) => id), ["1", "2", "3", "4"]);
+  assert.equal(env.last.hasMore, true);
+  await env.loadMore();
+  assert.deepEqual(env.last.posts.map(({ id }) => id), ["1", "2", "3", "4", "5"]);
+  assert.equal(env.last.hasMore, false);
+});
 
 test("appends posts in Facebook order without replacing initial posts or adding duplicate IDs", async () => {
   const initial = page([post("1"), post("2")], "older-A");
@@ -52,7 +127,7 @@ test("coalesces concurrent requests and publishes loading before the page arrive
   const second = env.loadMore();
   assert.equal(first, second);
   assert.deepEqual(env.last, {
-    posts: [post("1")], nextCursor: "older-A", loading: true, error: false,
+    posts: [post("1")], nextCursor: "older-A", hasMore: true, loading: true, error: false,
   });
   await Promise.resolve();
   assert.equal(requests, 1);
@@ -73,7 +148,9 @@ test("continues after an empty page when Facebook supplies a different next curs
   });
   await env.loadMore();
   assert.equal(env.last.nextCursor, "older-B");
+  assert.equal(env.last.hasMore, true);
   assert.deepEqual(env.last.posts.map(({ id }) => id), ["1"]);
+  assert.deepEqual(cursors, ["older-A"], "An empty filtered page must await another deliberate click");
   await env.loadMore();
   assert.deepEqual(cursors, ["older-A", "older-B"]);
   assert.deepEqual(env.last.posts.map(({ id }) => id), ["1", "2"]);
@@ -112,7 +189,7 @@ test("retains posts and cursor after failure so an explicit retry can recover", 
   });
   for (let attempt = 0; attempt < 3; attempt++) {
     await env.loadMore();
-    assert.deepEqual(env.last, { posts: [post("1")], nextCursor: "older-A", loading: false, error: true });
+    assert.deepEqual(env.last, { posts: [post("1")], nextCursor: "older-A", hasMore: true, loading: false, error: true });
   }
   const retry = env.loadMore();
   assert.equal(env.last.error, false);

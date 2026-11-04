@@ -1,8 +1,8 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, type MouseEvent } from "react";
 import type { BandPost, BandPostsPage } from "@/lib/facebook-posts";
-import { createNewsPager, type NewsSnapshot } from "@/lib/news-pagination";
+import { createNewsPager, getInitialNewsSnapshot } from "@/lib/news-pagination";
 import { band } from "@/lib/band";
 import { Icon } from "./icon";
 import styles from "./band-news.module.css";
@@ -19,12 +19,15 @@ async function fetchPage(cursor: string, signal: AbortSignal): Promise<BandPosts
   return response.json() as Promise<BandPostsPage>;
 }
 
-function NewsImage({ post }: { post: BandPost }) {
-  const [status, setStatus] = useState<"loading" | "ready" | "failed">("loading");
+function NewsImage({ post, onUnavailable }: { post: BandPost; onUnavailable: () => void }) {
+  const [status, setStatus] = useState<"loading" | "ready">("loading");
   const checkCached = useCallback((image: HTMLImageElement | null) => {
-    if (image?.complete) setStatus(image.naturalWidth ? "ready" : "failed");
-  }, []);
-  if (!post.imageUrl || status === "failed") return null;
+    if (image?.complete) {
+      if (image.naturalWidth) setStatus("ready");
+      else onUnavailable();
+    }
+  }, [onUnavailable]);
+  if (!post.imageUrl) return null;
   return (
     <a className={styles.image} data-loading={status === "loading"} href={post.permalink} target="_blank" rel="noopener noreferrer"
       aria-label={`View the band's photo from ${postDate.format(new Date(post.publishedAt))} on Facebook (opens in a new tab)`}>
@@ -32,137 +35,89 @@ function NewsImage({ post }: { post: BandPost }) {
       {/* Facebook's signed images must not sit in the image optimizer's longer-lived cache. */}
       <img ref={checkCached} src={post.imageUrl} alt={post.attachmentTitle || "Photo shared by The Jim Atkinson Band"}
         width={1200} height={800} loading="lazy" decoding="async" referrerPolicy="no-referrer"
-        onLoad={() => setStatus("ready")} onError={() => setStatus("failed")} />
+        onLoad={() => setStatus("ready")} onError={onUnavailable} />
       {post.kind === "video" && <span className={styles.videoLabel}><Icon name="play" size={14} /> Watch on Facebook</span>}
     </a>
   );
 }
 
 function NewsPost({ post }: { post: BandPost }) {
+  const [failedImage, setFailedImage] = useState<string | null>(null);
+  const imageUnavailable = useCallback(() => setFailedImage(post.imageUrl), [post.imageUrl]);
+  const hasImage = Boolean(post.imageUrl && post.imageUrl !== failedImage);
   // Shared-link URLs belong in the original post; the attachment supplies their readable preview.
   const message = post.message?.replace(/https?:\/\/[^\s]+/g, "").trim();
   const copy = (message || post.attachmentDescription || post.attachmentTitle || post.message)?.replace(/\s+/g, " ").trim();
   return (
-    <article className={styles.post} data-image={Boolean(post.imageUrl)}>
+    <article className={styles.post} data-image={hasImage}>
       <div className={styles.meta}>
         <time dateTime={post.publishedAt}>{postDate.format(new Date(post.publishedAt))}</time>
       </div>
-      {post.imageUrl && <NewsImage key={post.imageUrl} post={post} />}
-      {copy && <div className={styles.copy}><p className={styles.message}>{copy}</p></div>}
-      <a className={styles.postLink} data-news-post-link href={post.permalink} target="_blank" rel="noopener noreferrer">
-        <span>View post</span><Icon name="arrowUpRight" size={16} />
-        <span className="sr-only"> on Facebook, {postDate.format(new Date(post.publishedAt))} (opens in a new tab)</span>
-      </a>
+      <div className={styles.content}>
+        {copy && <p className={styles.message}>{copy}</p>}
+        <a className={styles.postLink} data-news-post-link href={post.permalink} target="_blank" rel="noopener noreferrer">
+          <span>View post</span><Icon name="arrowUpRight" size={15} />
+          <span className="sr-only"> on Facebook, {postDate.format(new Date(post.publishedAt))} (opens in a new tab)</span>
+        </a>
+      </div>
+      {hasImage && <NewsImage key={post.imageUrl} post={post} onUnavailable={imageUnavailable} />}
     </article>
   );
 }
 
-function RailArrow({ direction }: { direction: "previous" | "next" }) {
-  return <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-    <path d={direction === "next" ? "M4 12h16m-6-6 6 6-6 6" : "M20 12H4m6-6-6 6 6 6"} stroke="currentColor" strokeWidth="1.35" strokeLinecap="round" strokeLinejoin="round" />
-  </svg>;
-}
-
 export function NewsFeed({ initial }: { initial: BandPostsPage }) {
-  const [snapshot, setSnapshot] = useState<NewsSnapshot>({ posts: initial.posts, nextCursor: initial.nextCursor, loading: false, error: false });
-  const [visible, setVisible] = useState(false);
-  const [scrollable, setScrollable] = useState({ previous: false, next: initial.posts.length > 1 });
-  const section = useRef<HTMLElement>(null);
-  const rail = useRef<HTMLUListElement>(null);
-  const sentinel = useRef<HTMLLIElement>(null);
+  const [snapshot, setSnapshot] = useState(() => getInitialNewsSnapshot(initial));
+  const list = useRef<HTMLUListElement>(null);
   const loadButton = useRef<HTMLButtonElement>(null);
   const followLink = useRef<HTMLAnchorElement>(null);
-  const focusAfterLoad = useRef<number | null>(null);
+  const focusAfterLoad = useRef<{ count: number; keyboard: boolean } | null>(null);
   const pager = useRef<ReturnType<typeof createNewsPager> | null>(null);
 
   useEffect(() => {
+    focusAfterLoad.current = null;
+    setSnapshot(getInitialNewsSnapshot(initial));
     const controller = createNewsPager({ initial, fetchPage, onChange: setSnapshot });
     pager.current = controller;
     return () => { controller.cancel(); pager.current = null; };
   }, [initial]);
 
   useEffect(() => {
-    const element = section.current;
-    if (!element) return;
-    const observer = new IntersectionObserver(([entry]) => setVisible(entry.isIntersecting), { rootMargin: "100px 0px" });
-    observer.observe(element);
-    return () => observer.disconnect();
-  }, []);
-
-  useEffect(() => {
-    if (!visible || !snapshot.nextCursor || snapshot.error || !rail.current || !sentinel.current) return;
-    const observer = new IntersectionObserver(([entry]) => {
-      if (entry.isIntersecting) void pager.current?.loadMore();
-    }, { root: rail.current, rootMargin: "0px 180px 0px 0px", threshold: 0.01 });
-    observer.observe(sentinel.current);
-    return () => observer.disconnect();
-  }, [visible, snapshot.nextCursor, snapshot.error]);
-
-  useEffect(() => {
-    const element = rail.current;
-    if (!element) return;
-    const update = () => setScrollable({ previous: element.scrollLeft > 4, next: element.scrollLeft + element.clientWidth < element.scrollWidth - 4 });
-    update();
-    element.addEventListener("scroll", update, { passive: true });
-    const observer = new ResizeObserver(update);
-    observer.observe(element);
-    return () => { element.removeEventListener("scroll", update); observer.disconnect(); };
-  }, [snapshot.posts.length, snapshot.nextCursor]);
-
-  useEffect(() => {
-    const previousLength = focusAfterLoad.current;
-    if (snapshot.loading || previousLength === null) return;
+    const pendingFocus = focusAfterLoad.current;
+    if (snapshot.loading || pendingFocus === null) return;
     focusAfterLoad.current = null;
+    if (!pendingFocus.keyboard && loadButton.current) return;
     if (document.activeElement !== loadButton.current && document.activeElement !== document.body) return;
-    const nextPost = rail.current?.querySelectorAll<HTMLLIElement>(`li.${styles.item}`)[previousLength];
+    const nextPost = list.current?.children[pendingFocus.count];
     const target = nextPost?.querySelector<HTMLAnchorElement>("[data-news-post-link]") || loadButton.current || followLink.current;
     target?.focus({ preventScroll: true });
-    nextPost?.scrollIntoView({ block: "nearest", inline: "start", behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
   }, [snapshot.loading, snapshot.posts.length]);
 
-  function loadFromButton() {
+  function loadFromButton(event: MouseEvent<HTMLButtonElement>) {
     if (snapshot.loading) return;
-    if (document.activeElement === loadButton.current) focusAfterLoad.current = snapshot.posts.length;
+    // Keyboard readers continue with the newly revealed posts; pointer clicks keep their place.
+    focusAfterLoad.current = { count: snapshot.posts.length, keyboard: event.detail === 0 };
     void pager.current?.loadMore();
   }
 
-  const move = (direction: number) => {
-    const element = rail.current;
-    if (!element) return;
-    const first = element.querySelector("li");
-    const distance = first ? first.getBoundingClientRect().width + (parseFloat(getComputedStyle(element).columnGap) || 0) : element.clientWidth * .85;
-    element.scrollBy({ left: distance * direction, behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
-  };
-
   return (
-    <section ref={section} id="news" aria-labelledby="news-title" className={`${styles.section} mx-auto max-w-[1400px] px-5 md:px-10 lg:px-16`}>
+    <section id="news" aria-labelledby="news-title" className={`${styles.section} mx-auto max-w-[1400px] px-5 md:px-10 lg:px-16`}>
       <div className={styles.heading}>
+        <p className="eyebrow section-label"><span className="accent-dot" aria-hidden="true" /> FROM THE BAND</p>
         <h2 id="news-title" className="section-title font-display uppercase">Latest news.</h2>
-        {snapshot.posts.length > 0 && <div className={styles.controls} role="group" aria-label="Browse latest news">
-          <button type="button" onClick={() => move(-1)} disabled={!scrollable.previous} aria-label="Previous news" aria-controls="news-list"><RailArrow direction="previous" /></button>
-          <button type="button" onClick={() => move(1)} disabled={!scrollable.next} aria-label="Next news" aria-controls="news-list"><RailArrow direction="next" /></button>
-        </div>}
       </div>
 
-      {snapshot.posts.length || snapshot.nextCursor ? <>
-        <ul ref={rail} id="news-list" className={styles.rail} tabIndex={0} aria-label="Latest posts from The Jim Atkinson Band" onKeyDown={(event) => {
-          if (event.target !== event.currentTarget) return;
-          if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
-            event.preventDefault(); move(event.key === "ArrowLeft" ? -1 : 1);
-          } else if (event.key === "Home" || event.key === "End") {
-            event.preventDefault(); rail.current?.scrollTo({ left: event.key === "Home" ? 0 : rail.current.scrollWidth, behavior: "auto" });
-          }
-        }}>
+      {snapshot.posts.length || snapshot.hasMore ? <>
+        <ul ref={list} id="news-list" className={styles.feed} data-layout={snapshot.posts.length >= 3 ? "editorial" : "list"} aria-label="Latest posts from The Jim Atkinson Band">
           {snapshot.posts.map((post) => <li key={post.id} className={styles.item}><NewsPost post={post} /></li>)}
-          {snapshot.nextCursor && <li ref={sentinel} className={styles.more}>
-            {snapshot.error && <p>Couldn’t load the next posts.</p>}
-            <button ref={loadButton} type="button" className={styles.loadButton} onClick={loadFromButton} aria-disabled={snapshot.loading} aria-busy={snapshot.loading}>
-              {snapshot.loading ? <span className={styles.loading}><span aria-hidden="true" /> Loading more news</span> : <>{snapshot.error ? "Try again" : "Load more"}<RailArrow direction="next" /></>}
-            </button>
-          </li>}
         </ul>
         <div className={styles.bottom}>
-          <p role="status" aria-live="polite" className="sr-only">{snapshot.loading ? "Loading more news." : snapshot.error ? "Couldn’t load more posts. Try again." : ""}</p>
+          <div className={styles.more}>
+            {snapshot.hasMore && <button ref={loadButton} type="button" className={styles.loadButton} onClick={loadFromButton} aria-controls="news-list" aria-disabled={snapshot.loading} aria-busy={snapshot.loading}>
+              {snapshot.loading ? <span className={styles.loading}><span aria-hidden="true" /> Loading news</span> : <><span>{snapshot.error ? "Try again" : "More news"}</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 5v14M5 12h14" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" /></svg></>}
+            </button>}
+            {snapshot.error && <p className={styles.error}>Couldn’t load older posts. Please try again.</p>}
+          </div>
+          <p role="status" aria-live="polite" className="sr-only">{snapshot.loading ? "Loading more news." : snapshot.error ? "Couldn’t load more posts. Try again." : `${snapshot.posts.length} posts shown.`}</p>
           <a ref={followLink} href={band.facebook} target="_blank" rel="noopener noreferrer">More on Facebook<Icon name="arrowUpRight" size={15} /><span className="sr-only"> (opens in a new tab)</span></a>
         </div>
       </> : <a className={styles.fallback} href={band.facebook} target="_blank" rel="noopener noreferrer">Catch up with the band on Facebook<Icon name="arrowUpRight" size={18} /><span className="sr-only"> (opens in a new tab)</span></a>}
