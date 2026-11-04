@@ -68,6 +68,7 @@ function NewsPost({ post }: { post: BandPost }) {
 export function NewsFeed({ initial }: { initial: BandPostsPage }) {
   const [snapshot, setSnapshot] = useState(() => getInitialNewsSnapshot(initial));
   const list = useRef<HTMLUListElement>(null);
+  const viewport = useRef<HTMLDivElement>(null);
   const loadButton = useRef<HTMLButtonElement>(null);
   const followLink = useRef<HTMLAnchorElement>(null);
   const focusAfterLoad = useRef<{ count: number; keyboard: boolean } | null>(null);
@@ -85,9 +86,16 @@ export function NewsFeed({ initial }: { initial: BandPostsPage }) {
     const pendingFocus = focusAfterLoad.current;
     if (snapshot.loading || pendingFocus === null) return;
     focusAfterLoad.current = null;
+    const nextPost = list.current?.children[pendingFocus.count] as HTMLElement | undefined;
+    if (nextPost && viewport.current) {
+      // Move only the news window; never scroll the page or another ancestor.
+      viewport.current.scrollTo({
+        top: Math.max(0, nextPost.offsetTop - 12),
+        behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
+      });
+    }
     if (!pendingFocus.keyboard && loadButton.current) return;
     if (document.activeElement !== loadButton.current && document.activeElement !== document.body) return;
-    const nextPost = list.current?.children[pendingFocus.count];
     const target = nextPost?.querySelector<HTMLAnchorElement>("[data-news-post-link]") || loadButton.current || followLink.current;
     target?.focus({ preventScroll: true });
   }, [snapshot.loading, snapshot.posts.length]);
@@ -107,9 +115,11 @@ export function NewsFeed({ initial }: { initial: BandPostsPage }) {
       </div>
 
       {snapshot.posts.length || snapshot.hasMore ? <>
-        <ul ref={list} id="news-list" className={styles.feed} data-layout={snapshot.posts.length >= 3 ? "editorial" : "list"} aria-label="Latest posts from The Jim Atkinson Band">
-          {snapshot.posts.map((post) => <li key={post.id} className={styles.item}><NewsPost post={post} /></li>)}
-        </ul>
+        <div ref={viewport} className={styles.feedViewport} role="region" aria-label="Band news feed" tabIndex={0}>
+          <ul ref={list} id="news-list" className={styles.feed} data-layout={snapshot.posts.length >= 3 ? "editorial" : "list"} aria-label="Latest posts from The Jim Atkinson Band">
+            {snapshot.posts.map((post) => <li key={post.id} className={styles.item}><NewsPost post={post} /></li>)}
+          </ul>
+        </div>
         <div className={styles.bottom}>
           <div className={styles.more}>
             {snapshot.hasMore && <button ref={loadButton} type="button" className={styles.loadButton} onClick={loadFromButton} aria-controls="news-list" aria-disabled={snapshot.loading} aria-busy={snapshot.loading}>

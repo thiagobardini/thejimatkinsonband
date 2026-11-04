@@ -16,6 +16,7 @@ export function NewsLoading() {
         <h2 className="section-title font-display uppercase">Latest news.</h2>
       </div>
       <div className={styles.skeleton} aria-hidden="true"><span /><span /></div>
+      <div className={styles.loadingFooter} aria-hidden="true" />
       <span className="sr-only" role="status">Loading the latest from the band.</span>
     </section>
   );
