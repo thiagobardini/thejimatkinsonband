@@ -26,6 +26,9 @@ type PostsReadOptions = {
 };
 
 export const DEFAULT_NEWS_PAGE_ID = "1813541058730407";
+// Public profile linked by the band's Facebook posts; distinct from the Graph Page ID.
+const NEWS_PUBLIC_PAGE_ID = "100063041748866";
+const NEWS_PERMALINK_PAGE_ID = "1427040162740695";
 const PAGE_SIZE = 6;
 const POST_FIELDS = "id,message,created_time,permalink_url,full_picture,is_published,status_type,attachments{media_type,type,title,description,media,subattachments{media_type,type,title,description,media}}";
 
@@ -84,7 +87,7 @@ function inaccessibleAttachment(attachment: Record<string, unknown>): boolean {
     && /^this content (?:isn['’]t|is not) available right now\.?$/i.test(text(attachment.title, 400) ?? "");
 }
 
-export function normalizeFacebookPost(value: unknown): BandPost | null {
+export function normalizeFacebookPost(value: unknown, publicPageId?: string): BandPost | null {
   const post = record(value);
   if (!post || typeof post.id !== "string" || !/^\d{1,32}(?:_\d{1,32})?$/.test(post.id)) return null;
   if (post.is_published === false || (post.is_published != null && typeof post.is_published !== "boolean")) return null;
@@ -107,8 +110,25 @@ export function normalizeFacebookPost(value: unknown): BandPost | null {
   if (bareLink && (attachmentTitle || attachmentDescription)) message = null;
   if (!message && !imageUrl && !attachmentTitle && !attachmentDescription) return null;
   const [pageId, postId] = post.id.split("_");
-  const permalink = publicUrl(post.permalink_url, true)
+  let permalink = publicUrl(post.permalink_url, true)
     ?? (postId ? `https://www.facebook.com/${pageId}/posts/${postId}/` : `https://www.facebook.com/${pageId}/`);
+  if (publicPageId && /^\d{1,32}$/.test(publicPageId)) {
+    const url = new URL(permalink);
+    const pathPost = url.pathname.match(/^\/(\d{1,32})\/posts\/(\d{1,32})\/?$/);
+    const queryPostId = /^\/(?:story|permalink)\.php$/.test(url.pathname)
+      ? url.searchParams.get("story_fbid") : null;
+    const storyId = pathPost?.[2] || (queryPostId && /^\d{1,32}$/.test(queryPostId) ? queryPostId : null);
+    const ownerId = pathPost?.[1] || url.searchParams.get("id");
+    const knownOwner = ownerId === pageId || ownerId === publicPageId
+      || (pageId === DEFAULT_NEWS_PAGE_ID && ownerId === NEWS_PERMALINK_PAGE_ID);
+    if (storyId && knownOwner) {
+      // Use the public Page route for native app handoff, retaining photo substory selectors.
+      url.pathname = "/permalink.php";
+      url.searchParams.set("story_fbid", storyId);
+      url.searchParams.set("id", publicPageId);
+      permalink = url.href;
+    }
+  }
   const hasVideo = attachments.some((item) => /video/i.test(String(item.media_type ?? item.type ?? "")));
   const kind: BandPost["kind"] = hasVideo ? "video" : imageUrl ? "photo" : bareLink || attachments.length ? "link" : "text";
   return { id: post.id, message, publishedAt, permalink, imageUrl, attachmentTitle, attachmentDescription, kind };
@@ -137,7 +157,7 @@ export async function readFacebookPosts({ token: suppliedToken, pageId = DEFAULT
     if (!response.ok || !body || body.error || !Array.isArray(body.data)) return unavailable;
     const posts = new Map<string, BandPost>();
     for (const raw of body.data.slice(0, PAGE_SIZE)) {
-      const normalized = normalizeFacebookPost(raw);
+      const normalized = normalizeFacebookPost(raw, pageId === DEFAULT_NEWS_PAGE_ID ? NEWS_PUBLIC_PAGE_ID : undefined);
       if (!normalized) continue;
       const clean = Object.fromEntries(Object.entries(normalized).map(([key, value]) => [
         key,

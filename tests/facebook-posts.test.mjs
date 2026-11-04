@@ -39,6 +39,56 @@ test("news preserves text-only announcements and paragraph spacing without inven
   });
 });
 
+test("band news uses the public Page permalink for numeric Graph post links", async () => {
+  const { readFacebookPosts } = await api();
+  const result = await readFacebookPosts({ token, fetcher: fakeFetch([{ data: [{
+    ...post,
+    id: `${pageId}_1417199643724747`,
+    permalink_url: "https://www.facebook.com/1427040162740695/posts/1417199643724747",
+  }, {
+    ...post,
+    id: `${pageId}_1427454729365905`,
+    permalink_url: "https://www.facebook.com/1427040162740695/posts/1427454729365905?substory_index=1824528878749238",
+    full_picture: "https://scontent.example.com/photo.jpg",
+  }] }]) });
+  assert.equal(result.status, "connected");
+  assert.equal(result.posts.find(item => item.id.endsWith("_1417199643724747")).permalink, "https://www.facebook.com/permalink.php?story_fbid=1417199643724747&id=100063041748866");
+  const photoLink = new URL(result.posts.find(item => item.id.endsWith("_1427454729365905")).permalink);
+  assert.equal(photoLink.pathname, "/permalink.php");
+  assert.equal(photoLink.searchParams.get("story_fbid"), "1427454729365905");
+  assert.equal(photoLink.searchParams.get("id"), "100063041748866");
+  assert.equal(photoLink.searchParams.get("substory_index"), "1824528878749238");
+});
+
+test("public Page normalization preserves native photo, video and opaque story destinations", async () => {
+  const { readFacebookPosts } = await api();
+  for (const permalink_url of [
+    "https://www.facebook.com/photo/?fbid=1427454729365905&set=a.393683739409681",
+    "https://www.facebook.com/watch/?v=123",
+    "https://www.facebook.com/reel/123/",
+    "https://www.facebook.com/permalink.php?story_fbid=pfbidPublicStory&id=100063041748866",
+    "https://www.facebook.com/theband/posts/pfbidPublicStory/",
+    "https://www.facebook.com/999/posts/123/",
+    "https://www.facebook.com/permalink.php?story_fbid=123&id=999",
+  ]) {
+    const result = await readFacebookPosts({ token, fetcher: fakeFetch([{ data: [{ ...post, permalink_url }] }]) });
+    assert.equal(result.posts[0].permalink, permalink_url);
+  }
+  const otherPage = await readFacebookPosts({ token, pageId: "999", fetcher: fakeFetch([{ data: [{ ...post, id: "999_123", permalink_url: "https://www.facebook.com/999/posts/123/" }] }]) });
+  assert.equal(otherPage.posts[0].permalink, "https://www.facebook.com/999/posts/123/");
+});
+
+test("numeric story links and missing permalinks use the same public band identity", async () => {
+  const { readFacebookPosts } = await api();
+  for (const permalink_url of [post.permalink_url, undefined, "javascript:alert(1)"]) {
+    const result = await readFacebookPosts({ token, fetcher: fakeFetch([{ data: [{ ...post, permalink_url }] }]) });
+    const link = new URL(result.posts[0].permalink);
+    assert.equal(link.pathname, "/permalink.php");
+    assert.equal(link.searchParams.get("story_fbid"), "123");
+    assert.equal(link.searchParams.get("id"), "100063041748866");
+  }
+});
+
 test("shared posts retain their attachment story and album image without fetching target URLs", async () => {
   const { normalizeFacebookPost } = await api();
   const result = normalizeFacebookPost({
