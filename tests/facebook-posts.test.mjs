@@ -179,6 +179,41 @@ test("unpublished, empty and malformed posts never enter the public news feed", 
   assert.equal(normalizeFacebookPost({ ...post, full_picture: `https://scontent.example.com/image.jpg?access_token=${token}&size=large` }).imageUrl, "https://scontent.example.com/image.jpg?size=large");
 });
 
+test("hidden Page posts never enter news while visible posts remain available", async () => {
+  const { normalizeFacebookPost, readFacebookPosts } = await api();
+  for (const visibility of [
+    { is_hidden: true },
+    { is_hidden: "true" },
+    { is_hidden: false, timeline_visibility: "hidden" },
+  ]) {
+    assert.equal(normalizeFacebookPost({ ...post, ...visibility }), null);
+  }
+  for (const visibility of [
+    { is_hidden: false, timeline_visibility: "normal" },
+    { is_hidden: false, timeline_visibility: "forced_allow" },
+    {},
+  ]) {
+    assert.equal(normalizeFacebookPost({ ...post, ...visibility }).id, post.id);
+  }
+  const result = await readFacebookPosts({ token, fetcher: fakeFetch([{ data: [
+    { ...post, id: `${pageId}_456`, is_hidden: true },
+    { ...post, is_hidden: false, timeline_visibility: "normal" },
+  ] }]) });
+  assert.equal(result.status, "connected");
+  assert.deepEqual(result.posts.map(item => item.id), [`${pageId}_123`]);
+});
+
+test("a batch of hidden posts retains pagination to the older visible news", async () => {
+  const { readFacebookPosts } = await api();
+  const result = await readFacebookPosts({ token, fetcher: fakeFetch([{
+    data: [{ ...post, is_hidden: true }],
+    paging: { next: "https://ignored.example", cursors: { after: "older-visible-news" } },
+  }]) });
+  assert.equal(result.status, "connected");
+  assert.deepEqual(result.posts, []);
+  assert.equal(result.nextAfter, "older-visible-news");
+});
+
 test("news reads one small configured Page /posts page with header auth and five-minute revalidation", async () => {
   const { readFacebookPosts } = await api();
   const calls = [];
@@ -191,6 +226,9 @@ test("news reads one small configured Page /posts page with header auth and five
   assert.equal(calls[0].url.pathname, `/v26.0/${pageId}/posts`);
   assert.equal(calls[0].url.searchParams.get("limit"), "6");
   assert.ok(calls[0].url.searchParams.get("fields").split(",").includes("status_type"), "Graph must supply the native event classification");
+  for (const field of ["is_hidden", "timeline_visibility"]) {
+    assert.ok(calls[0].url.searchParams.get("fields").split(",").includes(field), `Graph must supply ${field} to respect Page post visibility`);
+  }
   assert.equal(calls[0].url.searchParams.get("after"), "cursor+one&two");
   assert.equal(calls[0].url.searchParams.has("access_token"), false);
   assert.equal(calls[0].init.headers.Authorization, `Bearer ${token}`);

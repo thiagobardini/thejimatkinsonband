@@ -30,7 +30,7 @@ export const DEFAULT_NEWS_PAGE_ID = "1813541058730407";
 const NEWS_PUBLIC_PAGE_ID = "100063041748866";
 const NEWS_PERMALINK_PAGE_ID = "1427040162740695";
 const PAGE_SIZE = 6;
-const POST_FIELDS = "id,message,created_time,permalink_url,full_picture,is_published,status_type,attachments{media_type,type,title,description,media,subattachments{media_type,type,title,description,media}}";
+const POST_FIELDS = "id,message,created_time,permalink_url,full_picture,is_published,is_hidden,timeline_visibility,status_type,attachments{media_type,type,title,description,media,subattachments{media_type,type,title,description,media}}";
 
 function record(value: unknown): Record<string, unknown> | null {
   return value !== null && typeof value === "object" && !Array.isArray(value)
@@ -91,6 +91,8 @@ export function normalizeFacebookPost(value: unknown, publicPageId?: string): Ba
   const post = record(value);
   if (!post || typeof post.id !== "string" || !/^\d{1,32}(?:_\d{1,32})?$/.test(post.id)) return null;
   if (post.is_published === false || (post.is_published != null && typeof post.is_published !== "boolean")) return null;
+  if (post.is_hidden === true || (post.is_hidden != null && typeof post.is_hidden !== "boolean")
+    || post.timeline_visibility === "hidden") return null;
   // Canonical event creation belongs in Shows; written promotions and shared event stories remain news.
   if (post.status_type === "created_event") return null;
   const publishedAt = publishedDate(post.created_time);
