@@ -20,3 +20,9 @@
 - Invalid credentials or pagination errors must not leak credentials or remove already loaded posts.
 - Infinite loading must be driven by browsing the rail, not download the archive as soon as the page loads.
 - Mobile touch scrolling and keyboard navigation must preserve access to all following sections.
+
+## Mobile overflow regression
+
+The initial mobile check incorrectly accepted a 390px body while the document still measured 1006px. Offscreen `.postLink .sr-only` labels were absolutely positioned relative to an ancestor outside the horizontal scrollport, so their invisible boxes enlarged the document. Giving `.postLink` its own positioning context contains those labels inside the rail, matching the existing past-show link pattern. No global overflow suppression is needed.
+
+Browser regression checks now require `document.documentElement.scrollWidth <= document.documentElement.clientWidth`: initially reproduced 1006/390 (failure); corrected widths 320, 375, 390, 430, 768 and 1280 all match the viewport. After pagination from four to nine posts at 390px, the document stays 390px while the rail's 3143px of content remains independently scrollable.
