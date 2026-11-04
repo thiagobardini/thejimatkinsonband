@@ -210,7 +210,7 @@ export function LivePerformance() {
     <section ref={section} id="watch" aria-labelledby="watch-title" className={styles.section} data-unavailable={playback === "error"} data-video-error={errorCode ?? undefined}>
       <div className={styles.heading}>
         <div>
-          <p className={styles.kicker}>THE BAND, LIVE</p>
+          <p className={styles.kicker}><span className="accent-dot" aria-hidden="true" /> THE BAND, LIVE</p>
           <h2 id="watch-title">Feel it live.</h2>
         </div>
         {playback === "error" ? (
