@@ -63,6 +63,44 @@ test("bare links stay readable without metadata; event promotion posts are retai
   assert.equal(eventPost.attachmentTitle, "Our next show");
 });
 
+test("automatic event creation posts stay in Shows rather than being duplicated as news", async () => {
+  const { normalizeFacebookPost } = await api();
+  assert.equal(normalizeFacebookPost({
+    ...post,
+    status_type: "created_event",
+    message: "Jim Atkinson Band Live at SSB Clinton",
+    full_picture: "https://scontent.example.com/poster.jpg",
+    attachments: { data: [{ type: "event", media_type: "link", title: "Jim Atkinson Band Live at SSB Clinton" }] },
+  }), null);
+});
+
+test("shared event stories and written promotions survive even with identical event titles and posters", async () => {
+  const { normalizeFacebookPost } = await api();
+  const promotion = {
+    ...post,
+    message: "Jim Atkinson Band Live at SSB Clinton",
+    full_picture: "https://scontent.example.com/poster.jpg",
+    attachments: { data: [{ type: "event", media_type: "link", title: "Jim Atkinson Band Live at SSB Clinton" }] },
+  };
+  for (const status_type of ["shared_story", "added_photos", "mobile_status_update", undefined]) {
+    const result = normalizeFacebookPost({ ...promotion, status_type });
+    assert.equal(result?.message, "Jim Atkinson Band Live at SSB Clinton");
+    assert.equal(result?.attachmentTitle, "Jim Atkinson Band Live at SSB Clinton");
+    assert.equal(result?.imageUrl, "https://scontent.example.com/poster.jpg");
+  }
+});
+
+test("a batch containing only automatic events still exposes the cursor for older news", async () => {
+  const { readFacebookPosts } = await api();
+  const result = await readFacebookPosts({ token, fetcher: fakeFetch([{
+    data: [{ ...post, status_type: "created_event" }],
+    paging: { next: "https://ignored.example", cursors: { after: "older-news" } },
+  }]) });
+  assert.equal(result.status, "connected");
+  assert.deepEqual(result.posts, []);
+  assert.equal(result.nextAfter, "older-news");
+});
+
 test("inaccessible Facebook shares omit placeholder errors while meaningful Page notes survive", async () => {
   const { normalizeFacebookPost, readFacebookPosts } = await api();
   const unavailable = { media_type: "link", type: "native_templates", title: "This content isn't available right now", description: "When this happens, it's usually because the owner only shared it with a small group of people.", media: { image: { src: "https://scontent.example.com/unavailable-placeholder.jpg" } } };
@@ -102,6 +140,7 @@ test("news reads one small configured Page /posts page with header auth and five
   assert.equal(calls[0].url.origin, "https://graph.facebook.com");
   assert.equal(calls[0].url.pathname, `/v26.0/${pageId}/posts`);
   assert.equal(calls[0].url.searchParams.get("limit"), "6");
+  assert.ok(calls[0].url.searchParams.get("fields").split(",").includes("status_type"), "Graph must supply the native event classification");
   assert.equal(calls[0].url.searchParams.get("after"), "cursor+one&two");
   assert.equal(calls[0].url.searchParams.has("access_token"), false);
   assert.equal(calls[0].init.headers.Authorization, `Bearer ${token}`);

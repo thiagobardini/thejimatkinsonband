@@ -26,3 +26,11 @@
 The initial mobile check incorrectly accepted a 390px body while the document still measured 1006px. Offscreen `.postLink .sr-only` labels were absolutely positioned relative to an ancestor outside the horizontal scrollport, so their invisible boxes enlarged the document. Giving `.postLink` its own positioning context contains those labels inside the rail, matching the existing past-show link pattern. No global overflow suppression is needed.
 
 Browser regression checks now require `document.documentElement.scrollWidth <= document.documentElement.clientWidth`: initially reproduced 1006/390 (failure); corrected widths 320, 375, 390, 430, 768 and 1280 all match the viewport. After pagination from four to nine posts at 390px, the document stays 390px while the rail's 3143px of content remains independently scrollable.
+
+## Approved compact refinement
+
+Keep the existing position between History and Video. Reduce the header to Latest news and arrows, remove type labels and normal pagination helper copy, use a three-line preview linking to the complete Facebook post, and let each post take its natural height with the link directly after its caption. Preserve the positioned link containment that fixed mobile overflow.
+
+Exclude only Facebook's automatic `status_type: created_event` stories. Preserve written event promotion, photographs, shared stories and event attachments; do not filter by title, image or keywords. Meta's current Page response supports the field. New regression tests cover both exclusion/preservation and continued pagination after a fully filtered batch.
+
+At a 390px viewport, initial section height drops from 770px to 530px and post link gaps become 10px while document width remains 390px. Independent review found no actionable regressions.

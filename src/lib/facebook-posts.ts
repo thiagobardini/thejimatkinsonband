@@ -27,7 +27,7 @@ type PostsReadOptions = {
 
 export const DEFAULT_NEWS_PAGE_ID = "1813541058730407";
 const PAGE_SIZE = 6;
-const POST_FIELDS = "id,message,created_time,permalink_url,full_picture,is_published,attachments{media_type,type,title,description,media,subattachments{media_type,type,title,description,media}}";
+const POST_FIELDS = "id,message,created_time,permalink_url,full_picture,is_published,status_type,attachments{media_type,type,title,description,media,subattachments{media_type,type,title,description,media}}";
 
 function record(value: unknown): Record<string, unknown> | null {
   return value !== null && typeof value === "object" && !Array.isArray(value)
@@ -88,6 +88,8 @@ export function normalizeFacebookPost(value: unknown): BandPost | null {
   const post = record(value);
   if (!post || typeof post.id !== "string" || !/^\d{1,32}(?:_\d{1,32})?$/.test(post.id)) return null;
   if (post.is_published === false || (post.is_published != null && typeof post.is_published !== "boolean")) return null;
+  // Canonical event creation belongs in Shows; written promotions and shared event stories remain news.
+  if (post.status_type === "created_event") return null;
   const publishedAt = publishedDate(post.created_time);
   if (!publishedAt) return null;
   const rawAttachments = attachmentRows(post.attachments);

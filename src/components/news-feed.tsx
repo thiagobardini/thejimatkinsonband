@@ -39,26 +39,16 @@ function NewsImage({ post }: { post: BandPost }) {
 }
 
 function NewsPost({ post }: { post: BandPost }) {
-  const [expanded, setExpanded] = useState(false);
   // Shared-link URLs belong in the original post; the attachment supplies their readable preview.
   const message = post.message?.replace(/https?:\/\/[^\s]+/g, "").trim();
-  const copy = message || post.attachmentDescription || post.attachmentTitle || post.message;
-  const title = message && post.attachmentTitle && !message.includes(post.attachmentTitle) ? post.attachmentTitle : null;
-  const long = (copy?.length ?? 0) > 250;
+  const copy = (message || post.attachmentDescription || post.attachmentTitle || post.message)?.replace(/\s+/g, " ").trim();
   return (
     <article className={styles.post} data-image={Boolean(post.imageUrl)}>
       <div className={styles.meta}>
         <time dateTime={post.publishedAt}>{postDate.format(new Date(post.publishedAt))}</time>
-        <span>{post.kind === "photo" ? "PHOTO" : post.kind === "video" ? "VIDEO" : post.kind === "link" ? "SHARED" : "A NOTE FROM THE BAND"}</span>
       </div>
       {post.imageUrl && <NewsImage key={post.imageUrl} post={post} />}
-      <div className={styles.copy}>
-        {title && <p className={styles.attachmentTitle}>{title}</p>}
-        {copy && <p className={styles.message} data-expanded={expanded || !long}>{copy}</p>}
-        {long && <button type="button" className={styles.expand} onClick={() => setExpanded(!expanded)} aria-expanded={expanded}>
-          {expanded ? "Show less" : "Read more"}
-        </button>}
-      </div>
+      {copy && <div className={styles.copy}><p className={styles.message}>{copy}</p></div>}
       <a className={styles.postLink} data-news-post-link href={post.permalink} target="_blank" rel="noopener noreferrer">
         <span>View post</span><Icon name="arrowUpRight" size={16} />
         <span className="sr-only"> on Facebook, {postDate.format(new Date(post.publishedAt))} (opens in a new tab)</span>
@@ -147,11 +137,7 @@ export function NewsFeed({ initial }: { initial: BandPostsPage }) {
   return (
     <section ref={section} id="news" aria-labelledby="news-title" className={`${styles.section} mx-auto max-w-[1400px] px-5 md:px-10 lg:px-16`}>
       <div className={styles.heading}>
-        <div>
-          <p className="eyebrow section-label"><span className="accent-dot" aria-hidden="true" /> FROM THE BAND</p>
-          <h2 id="news-title" className="section-title font-display uppercase">Latest news.</h2>
-          <p className={styles.intro}>On stage, off stage, and everything in between.</p>
-        </div>
+        <h2 id="news-title" className="section-title font-display uppercase">Latest news.</h2>
         {snapshot.posts.length > 0 && <div className={styles.controls} role="group" aria-label="Browse latest news">
           <button type="button" onClick={() => move(-1)} disabled={!scrollable.previous} aria-label="Previous news" aria-controls="news-list"><RailArrow direction="previous" /></button>
           <button type="button" onClick={() => move(1)} disabled={!scrollable.next} aria-label="Next news" aria-controls="news-list"><RailArrow direction="next" /></button>
@@ -169,15 +155,15 @@ export function NewsFeed({ initial }: { initial: BandPostsPage }) {
         }}>
           {snapshot.posts.map((post) => <li key={post.id} className={styles.item}><NewsPost post={post} /></li>)}
           {snapshot.nextCursor && <li ref={sentinel} className={styles.more}>
-            <p>{snapshot.error ? "Couldn’t load the next posts." : "A little further back."}</p>
+            {snapshot.error && <p>Couldn’t load the next posts.</p>}
             <button ref={loadButton} type="button" className={styles.loadButton} onClick={loadFromButton} aria-disabled={snapshot.loading} aria-busy={snapshot.loading}>
-              {snapshot.loading ? <span className={styles.loading}><span aria-hidden="true" /> Loading more news</span> : <>{snapshot.error ? "Try again" : "Load more news"}<RailArrow direction="next" /></>}
+              {snapshot.loading ? <span className={styles.loading}><span aria-hidden="true" /> Loading more news</span> : <>{snapshot.error ? "Try again" : "Load more"}<RailArrow direction="next" /></>}
             </button>
           </li>}
         </ul>
         <div className={styles.bottom}>
-          <p role="status" aria-live="polite" className={styles.status}>{snapshot.loading ? "Bringing in more from the band…" : snapshot.error ? "Your news is still here. Try loading more again." : snapshot.nextCursor ? "Explore a little further. More stories load as you go." : "You’re all caught up."}</p>
-          <a ref={followLink} href={band.facebook} target="_blank" rel="noopener noreferrer">Follow along on Facebook<Icon name="arrowUpRight" size={15} /><span className="sr-only"> (opens in a new tab)</span></a>
+          <p role="status" aria-live="polite" className="sr-only">{snapshot.loading ? "Loading more news." : snapshot.error ? "Couldn’t load more posts. Try again." : ""}</p>
+          <a ref={followLink} href={band.facebook} target="_blank" rel="noopener noreferrer">More on Facebook<Icon name="arrowUpRight" size={15} /><span className="sr-only"> (opens in a new tab)</span></a>
         </div>
       </> : <a className={styles.fallback} href={band.facebook} target="_blank" rel="noopener noreferrer">Catch up with the band on Facebook<Icon name="arrowUpRight" size={18} /><span className="sr-only"> (opens in a new tab)</span></a>}
     </section>
