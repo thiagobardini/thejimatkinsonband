@@ -52,7 +52,7 @@ The server reads the Page's `/events` endpoint using these variables, privately 
 
 Never prefix the token with `NEXT_PUBLIC_`. The server-only adapter does not pass credentials, raw Graph responses or pagination URLs to client components. Only selected public display fields reach the browser. The App ID and Login Configuration ID are not required for this read-only feed.
 
-Schedule reads and the homepage revalidate after 900 seconds. Refresh is triggered by visits after the cache interval, so the first visitor can receive the previous version while regeneration runs; this is not an instant webhook or a scheduled import. Attendance totals refresh separately, as described below. A new Vercel deployment is required after changing environment variables.
+Schedule reads revalidate after 900 seconds; the homepage regenerates on the shorter five-minute news interval. Refresh is triggered by visits after the cache interval, so the first visitor can receive the previous version while regeneration runs; this is not an instant webhook or a scheduled import. Attendance totals refresh separately, as described below. A new Vercel deployment is required after changing environment variables.
 
 Reads are bounded to three pages of 50 records, then deduplicated and sorted. The interface shows at most six upcoming shows in a horizontal carousel, nearest show first. Each upcoming slide fills the container with its date, large poster and details; a single show keeps that same featured layout without navigation arrows. Twenty recent past shows appear in a separate poster carousel, not a complete archive. Both support touch scrolling and keyboard navigation. Posters reserve their dimensions and show a subtle loading indicator until ready; failed or missing covers have a styled fallback. Canceled events are omitted when Facebook returns that field. Dates and times use `America/New_York`; an event without an end stays upcoming on its calendar date and becomes past the next day, without an invented end time. Unavailable or malformed responses fall back to Facebook rather than claiming there are no events.
 
@@ -71,6 +71,16 @@ npm run build -- --webpack
 ```
 
 The native Node tests require a Node version that can import erasable TypeScript syntax (Node 22.18+).
+
+## Latest news from Facebook
+
+The homepage includes an editorial **Latest news** feed between History and the live video. It reads the Page's public posts using the same private server configuration as Events, while leaving the show schedule separate. Photo posts, shared attachments and text notices are shown newest first, including event promotion posts. Some shared targets are inaccessible through Meta's API even when the Page post is readable; generic unavailable-content templates are omitted, while meaningful messages from the Page are kept. Publication dates are shown in Eastern time and are never treated as event dates.
+
+The first six Facebook records are read in a Server Component. Further pages load only as visitors approach the end of the horizontal rail, using IntersectionObserver and a same-origin Route Handler at `/api/news`. Filtering inaccessible or empty records can produce fewer than six visible posts per batch. The rail supports touch, arrow buttons, keyboard navigation and an explicit Load more fallback. Images load lazily with reserved dimensions and a loading state; longer notices can expand in place. Links open the original Facebook post in a separate tab.
+
+Graph requests use Next.js Data Cache with `revalidate: 300`; new requests after five minutes trigger revalidation, rather than instantly pushing every new post into an already open tab. The homepage's effective regeneration interval is consequently five minutes. Pagination responses use browser/CDN `no-store`, and the private upstream cache still limits repeat reads. Cursors are authenticated and encrypted, scoped to the configured Page, Graph version and token. Neither the token nor Graph pagination URLs are sent to the browser. Token rotation invalidates existing cursors; reloading the page starts a new feed. Pagination errors keep the posts already shown and provide a retry, and there is no background download of the complete archive.
+
+Implementation: `src/lib/facebook-posts.ts`, `src/lib/facebook-posts-cursor.ts`, `src/lib/facebook-posts-server.ts`, `src/lib/news-pagination.ts`, `src/app/api/news/route.ts`, `src/components/band-news.tsx`, `src/components/news-feed.tsx` and `src/components/band-news.module.css`. No extra packages or environment variables are required.
 
 ## Optional Facebook read diagnostic
 

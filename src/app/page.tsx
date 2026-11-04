@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { Suspense } from "react";
 import { BandLogo } from "@/components/band-logo";
 import { HeroPhoto } from "@/components/hero-photo";
 import { HeroNextShow } from "@/components/hero-next-show";
@@ -16,6 +17,7 @@ import { StudioCredit } from "@/components/studio-credit";
 import { BandEvents } from "@/components/band-events";
 import { getBandEvents } from "@/lib/facebook";
 import { partitionEvents } from "@/lib/facebook-events";
+import { BandNews, NewsLoading } from "@/components/band-news";
 
 export const revalidate = 900;
 
@@ -123,6 +125,10 @@ export default async function Home() {
           </article>
         </section>
         </SectionReveal>
+
+        <Suspense fallback={<NewsLoading />}>
+          <SectionReveal><BandNews /></SectionReveal>
+        </Suspense>
 
         <LivePerformance />
 
