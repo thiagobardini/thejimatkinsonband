@@ -37,6 +37,7 @@ export function MobileMenu() {
             <a href="#the-band">The band <Icon name="arrowDown" size={18} /></a>
             <a href="#history">Our history <Icon name="arrowDown" size={18} /></a>
             <a href="#shows">Live shows <Icon name="arrowDown" size={18} /></a>
+            <a href="#news">News <Icon name="arrowDown" size={18} /></a>
             <a href="#contact">Get in touch <Icon name="arrowDown" size={18} /></a>
           </motion.nav>
         )}

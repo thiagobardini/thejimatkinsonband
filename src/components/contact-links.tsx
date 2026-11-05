@@ -22,6 +22,7 @@ export function ContactLinks() {
           <Icon name="instagram" size={25} className={styles.instagramIcon} />
           <span className={styles.copy}>
             <span className={styles.instagramText}>More of an Instagram person?</span>
+            <span className={styles.instagramMobileText}>Message on Instagram</span>
             <span className={styles.message}>Send us a message</span>
           </span>
         </span>

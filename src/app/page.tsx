@@ -37,6 +37,7 @@ export default async function Home() {
           <a className="nav-link" href="#the-band">The band</a>
           <a className="nav-link" href="#history">Our history</a>
           <a className="nav-link" href="#shows">Live shows</a>
+          <a className="nav-link" href="#news">News</a>
         </nav>
         <a href="#contact" className="header-contact hidden items-center gap-5 lg:inline-flex">Get in touch <Icon name="arrowUpRight" size={19} /></a>
         <MobileMenu />
@@ -137,7 +138,7 @@ export default async function Home() {
           <div className="mx-auto grid max-w-[1400px] grid-cols-1 gap-10 px-5 md:grid-cols-[1fr_1.1fr] md:gap-16 md:px-10 lg:px-16">
             <div>
               <p className="eyebrow section-label"><span className="accent-dot" /> LET’S GET SOMETHING GOING</p>
-              <h2 id="contact-title" className="section-title font-display uppercase">Your stage.<br />Our kind of night.</h2>
+              <h2 id="contact-title" className="section-title font-display uppercase"><span className="hidden md:inline">Your stage.<br />Our kind of night.</span><span className="md:hidden">Let’s talk.</span></h2>
               <p className="contact-description">Have a venue, an event, or just a question?<br />We’d love to hear from you.</p>
             </div>
             <ContactLinks />
